@@ -1,0 +1,9 @@
+db/
+img/
+Include/
+Lib/
+pyenv.cfg
+responses/
+save/
+Scripts/
+__pycache__
