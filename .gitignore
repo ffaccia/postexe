@@ -2,7 +2,7 @@ db/
 img/
 Include/
 Lib/
-pyenv.cfg
+pyvenv.cfg
 responses/
 save/
 Scripts/

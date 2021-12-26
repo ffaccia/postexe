@@ -11,7 +11,7 @@ from tkinter import *
 from tkinter import ttk, messagebox, filedialog
 import tkinter as tk
 from tkcalendar import DateEntry
-
+from utils import round_format_size as rs
 import sqlite3
 import logging
 from PIL import ImageTk, Image
@@ -89,7 +89,7 @@ def setup_connection():
     comm = """CREATE TABLE IF NOT EXISTS pdf2ws0f 
                                (id       INTEGER PRIMARY KEY, 
                                 filename TEXT, 
-                                size     INTEGER,
+                                size     VARCHAR(10),
                                 dt_snd   TEXT,
                                 dt_rcv   TEXT,
                                 status   INTEGER)
@@ -98,7 +98,8 @@ def setup_connection():
 
     comm = """CREATE TABLE IF NOT EXISTS pdf2file0f 
                                (id       INTEGER, 
-                                filename VARCHAR(250), 
+                                filename VARCHAR(250),
+                                size     INTEGER, 
                                 data     TEXT,
                                 FOREIGN KEY(id) REFERENCES pdf2ws0f(id))
            """
@@ -187,16 +188,31 @@ def setup_frames():
     
     qfile = StringVar()
     qstatus = StringVar()
-    qid = IntVar()
+    qid = StringVar()
         
     trv = ttk.Treeview(wrapper1, columns=(1,2,3,4,5,6))
-    style=ttk.Style()
-    style.configure('Treeview', rowheight=20)
     
+    vsb = ttk.Scrollbar(wrapper1, orient="vertical", command=trv.yview)
+    vsb.pack(side='right', fill='y')
+    trv.configure(yscrollcommand=vsb.set)
+    
+    style=ttk.Style()
+    
+    style.theme_use("default")
 
+    style.map('Treeview', 
+              background=[('selected','brown')]
+             )
+
+    style.configure('Treeview', 
+                    background='#ffffff',
+                    foreground='black',
+                    fieldbackground='#ffffff'
+                   )
+    
     trv.tag_configure('checked', image=im_checked)
     trv.tag_configure('unchecked', image=im_unchecked)
-    trv.tag_configure('gray', background='#cc6666')
+    trv.tag_configure('gray', background='#cccccc')
     
 
     trv.column("#0", minwidth=40, width=40, stretch=0)
@@ -272,6 +288,7 @@ def setup_frames():
     enta.grid(column=3, row=1, padx=5, pady=5)
     
     
+    #done with lambda in order not to make qfile, entda, enta, qstatus globals
     search_btn = Button(wrapper3, text="Search Files", command=lambda:search_files(qfile, entda, enta, qstatus))
     search_btn.grid(column=0, row=2, padx=5, pady=5)
     clear_btn = Button(wrapper3, text="Clear", command=clear)
@@ -283,7 +300,8 @@ def setup_frames():
     entdel = Entry(wrapper4, textvariable=qid)
     entdel.grid(column=1, row=0, padx=5, pady=5)
     
-    del_btn = Button(wrapper4, text="Delete id", command=delete_id)
+    #done with lambda in order not to make qid global
+    del_btn = Button(wrapper4, text="Delete id", command=lambda:delete_id(qid))
     del_btn.grid(column=2, row=0, padx=5, pady=5)
     
     exit_btn = Button(wrapper4, text="Exit App", command=root.destroy)
@@ -385,7 +403,7 @@ def update(rows):
     trv.delete(*trv.get_children())
     for i, row in enumerate(rows):
         tags=['unchecked'] if i%2 == 1 else ['unchecked','gray']
-        print("inserted ", tags)
+        print("inserted %d %s" % (i, str(tags)))
         trv.insert('', 'end', values=row, tags=tags)
     
     toggleDisableButton()
@@ -407,6 +425,14 @@ def countChecked(opt="checked"):
     return cnt
 
 
+def getCheckedIds(opt="checked"):
+    cnt=0
+    for rowid in list(reversed(trv.get_children())):
+        #iid = trv.index(item)
+        if trv.item(rowid, "tags")[0] == opt:
+            yield trv.item(rowid)
+    
+    
 def toggleDisableButton():
     print(trv.get_children())
     tot = len(list(trv.get_children()))
@@ -447,11 +473,35 @@ def toggleCheck(event):
             trv.item(rowid, tags="checked")
         toggleDisableButton()
 
+    for i, rid in enumerate(trv.get_children()):
+        if rid != rowid:
+            if i%2 == 0:
+                tags = (trv.item(rid, "tags")[0],"gray")
+            else:
+                tags = (trv.item(rid, "tags")[0],)
+            
+            trv.item(rid, tags=tags)
+
+
 
 def upload_again():
-    for row in trv.get_children():
+    """
+    #for row in trv.get_children():
+    #for row in trv_list:
         item = trv.item(row)
         print("qwe---")
+        print(item["tags"])
+        print(item)
+        print(item['values'][0])
+        print(item['values'][1])    
+        if item["tags"][0] == "checked":
+            upload_files(item['values'][1])
+    """
+    trv_list = [ trv.item(row) for row in trv.get_children() ]
+    for item in trv_list:
+        #item = trv_list(row)
+        print("qwe---")
+        print(item)
         print(item["tags"])
         print(item)
         print(item['values'][0])
@@ -477,7 +527,7 @@ def record_upload(filename, size, dt_snd, dt_rcv, status):
     
     #print(filename, dt_snd, dt_rcv, status)
     try:       
-        cur.execute('INSERT INTO pdf2ws0f (filename, size, dt_snd, dt_rcv, status) VALUES (?,?,?,?,?)', (filename, size, dt_snd, dt_rcv, status))
+        cur.execute('INSERT INTO pdf2ws0f (filename, size, dt_snd, dt_rcv, status) VALUES (?,?,?,?,?)', (filename, rs(size), dt_snd, dt_rcv, status))
         rows=get_affected_rows()
         rowid = cur.lastrowid
         print(type(rows))
@@ -506,12 +556,12 @@ def file_load(id, file):
     print(id, file)
     basename = os.path.basename(file)
     text_data = base64.b64encode(open(file,"rb").read())
-    #print(text_data)
+    size = len(text_data)
     
     try:       
         #cur.execute("INSERT INTO pdf2file0f (id, filename, data) VALUES ({0},{1},{2})".format(id, basename, text_data))
-        sql="INSERT INTO pdf2file0f (id, filename, data) VALUES (?,?,?) "
-        cur.execute(sql, (id, basename, text_data))
+        sql="INSERT INTO pdf2file0f (id, filename, size, data) VALUES (?,?,?,?) "
+        cur.execute(sql, (id, basename, size, text_data))
     except sqlite3.Error as e:
         print("error sql")
         error=True
@@ -552,30 +602,74 @@ def get_affected_rows():
     return cur.fetchone()[0]
        
 
-def delete_id():
-    id = t1.get()       
+def delete_id(qid):
 
-    if messagebox.askyesno("Confirm please", "Are you sure you want to delete customer %d ?" % id) == False:
+    tot = len(list(trv.get_children()))
+    if tot == 0:
+        return False
+    
+    try:
+        id=int(qid.get())
+    except ValueError:
+        id=0    
+    
+    cntCkd = countChecked()
+    
+    if cntCkd == 0 and id == 0:   
+        return False
+        
+
+    if cntCkd == tot and tot > 1: 
+        msg="Are you sure you want to delete all %d rows?" % tot
+        ids = (row['values'][0] for row in getCheckedIds())
+    elif cntCkd > 0:    
+        ids = [row['values'][0] for row in getCheckedIds()]
+        msg="Are you sure you want to delete these ids? (%s) " % ', '.join(str(id) for id in ids)
+    else:
+        msg="Are you sure you want to delete this id %d?" % id
+    if messagebox.askyesno("Confirm please", msg) == False:
         return False
 
+
     try:
-        query=""" DELETE FROM pdf2ws0f WHERE id = %d """ % id
-        cur.execute(query)      
-        
-        if get_affected_rows() != 1:   
-            msg="Deleted rows: %d" % get_affected_rows()
-            logging.error(msg)
-            messagebox.showwarning("Delete Error", msg) 
-            conn.rollback()
-            logging.error("rollback occurred") 
-            return True
+        for id in ids:
+            print("to delete ", id)
+            
+            query=""" SELECT id FROM pdf2file0f WHERE id = ? """ 
+            cur.execute(query, (id,))
+            
+            if cur.fetchone() != None:
+                query=""" DELETE FROM pdf2file0f WHERE id = ? """ 
+                deleted = cur.execute(query, (id,)).rowcount
+                if deleted != 1:     
+                #if get_affected_rows() != 1:   
+                    msg="Error deleting rows from pdf2file0f. Deleted rows: %d" % deleted
+                    logging.error(msg)
+                    messagebox.showwarning("Delete Error", msg) 
+                    conn.rollback()
+                    logging.error("rollback occurred") 
+                    return True
+    
+                query=""" DELETE FROM pdf2ws0f WHERE id = ? """ 
+                deleted = cur.execute(query, (id,)).rowcount
+                if deleted != 1:     
+                #if get_affected_rows() != 1:   
+                    msg="Error deleting rows from pdf2ws0f. Deleted rows: %d" % deleted
+                    logging.error(msg)
+                    messagebox.showwarning("Delete Error", msg) 
+                    conn.rollback()
+                    logging.error("rollback occurred") 
+                    return True
+
+
     except sqlite3.Error as e:
         conn.rollback()
         logging.error("rollback occurred") 
         messagebox.showerror("Insert Error", str(e))
     else:
         conn.commit()
-    
+        populate()
+        
     return True            
  
 
