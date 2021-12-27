@@ -2,6 +2,7 @@ db/
 img/
 Include/
 Lib/
+export/
 pyvenv.cfg
 responses/
 save/

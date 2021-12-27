@@ -3,32 +3,41 @@ import requests
 import sys
 import os
 from shutil import copyfile as sh_copy
-import time
 import base64
+
 from datetime import datetime as dt
+import time
+
+import sqlite3
+import logging
 
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
 import tkinter as tk
 from tkcalendar import DateEntry
-from utils import round_format_size as rs
-import sqlite3
-import logging
+
+from openpyxl import Workbook
+from openpyxl.styles import PatternFill, Border, Side, Font
+from openpyxl.utils import get_column_letter
+
 from PIL import ImageTk, Image
 
+from utils import round_format_size as rs
 
 FORMAT = "[ %(asctime)s, %(levelname)s] %(message)s" 
 
+
+                 
 dbFile, conn, cur = None, None, None
 CODES_OK, extensions, MULTI_FILES = None, None, None
-entry_dir, abs_dir, resp_dir, save_dir, file_save = None, None, None, None, None
+entry_dir, abs_dir, response_dir, save_dir, file_save, export_dir = None, None, None, None, None, None
 im_checked, im_unchecked, trv = None, None, None
-checkall_btn, uncheckall_btn, upload_again_btn = None, None, None
+checkall_btn, uncheckall_btn, upload_again_btn, excel_btn = None, None, None, None
 url = None
 
 SAVE_FILE_DB = True   
 SAVE_FILE_DIR = True   
-w_width = 740
+w_width = 900
 w_height = 600
 
 root = Tk()
@@ -38,7 +47,7 @@ root.geometry("%dx%d" % (w_width, w_height))
    
 def setup_profile():    
     global extensions, CODES_OK, MULTI_FILES, im_checked, im_unchecked
-    global resp_dir, save_dir, url
+    global response_dir, save_dir, export_dir, url
     
     url = 'https://httpbin.org/post'
     extensions = ['pdf']
@@ -66,13 +75,17 @@ def setup_profile():
     print(funchecked)
     
     
-    resp_dir = os.path.join(".","responses")
-    if os.path.isdir(resp_dir) == False:
-        os.mkdir(resp_dir, 755);
+    response_dir = os.path.join(".","responses")
+    if os.path.isdir(response_dir) == False:
+        os.mkdir(response_dir, 755);
     
     save_dir = os.path.join(".","save")
     if os.path.isdir(save_dir) == False:
         os.mkdir(save_dir, 755);
+    
+    export_dir = os.path.join(".","export")
+    if os.path.isdir(export_dir) == False:
+        os.mkdir(export_dir, 755);
     
     logName = os.path.join(".", "responses", "responses.log")
     logging.basicConfig(filename=logName, level=logging.DEBUG, format=FORMAT)
@@ -170,7 +183,7 @@ def clear():
 
 
 def setup_frames():    
-    global trv, checkall_btn, uncheckall_btn, upload_again_btn
+    global trv, checkall_btn, uncheckall_btn, upload_again_btn, excel_btn
 
     wrapper1 = LabelFrame(root, text="Last Sent Pdf")
     wrapper2 = LabelFrame(root,  text="Upload Pdf")
@@ -248,6 +261,12 @@ def setup_frames():
 
     upload_again_btn = Button(wrapper1, text="Upload again", command=upload_again)
     upload_again_btn.pack(side=LEFT, anchor="s", padx=10)
+
+    excel_btn = Button(wrapper1, text="Export", command=write_workBook)
+    excel_btn.pack(side=LEFT, anchor="s", padx=10)
+
+
+
 
     populate()
     #toggleDisableButton()
@@ -347,7 +366,7 @@ def upload_files(here_file=None):
         r = requests.post(url, files=files)
         dt_rcv = get_timestamp()
         
-        file_response = os.path.join(resp_dir, "%s%s" % (fbase, ".response"))
+        file_response = os.path.join(response_dir, "%s%s" % (fbase, ".response"))
 
         file_save = os.path.join(save_dir, file)
         print("---")
@@ -428,7 +447,8 @@ def countChecked(opt="checked"):
 def getCheckedIds(opt="checked"):
     cnt=0
     for rowid in list(reversed(trv.get_children())):
-        #iid = trv.index(item)
+        print("getcheckedids")
+        print(type(trv.item(rowid, "values")))
         if trv.item(rowid, "tags")[0] == opt:
             yield trv.item(rowid)
     
@@ -438,6 +458,7 @@ def toggleDisableButton():
     tot = len(list(trv.get_children()))
     print("tot %s" % tot)
     if tot:
+        excel_btn['state'] = "active"
         if countChecked() == tot:
             checkall_btn['state'] = "disabled"
             uncheckall_btn['state'] = "active"
@@ -454,6 +475,7 @@ def toggleDisableButton():
         checkall_btn['state'] = "disabled"
         uncheckall_btn['state'] = "disabled"
         upload_again_btn['state'] = "disabled"
+        excel_btn['state'] = "disabled"
             
             
     
@@ -673,7 +695,54 @@ def delete_id(qid):
     return True            
  
 
- 
+def write_workBook():
+    bstart=True
+    
+    column_width=(None, 5, 45, 8, 25, 25, 8)
+    
+    font_header = Font(name='Calibri',
+                 size=13,
+                 bold=True,
+                 color='00000000')
+    
+    fillColorHeader = PatternFill(start_color="FFFF00", 
+                                  end_color="FFFF00", 
+                                  fill_type = "solid")
+    
+    fillColorStriped = PatternFill(start_color="CCCCCC", 
+                                  end_color="CCCCCC", 
+                                  fill_type = "solid")    
+    #print("before wotkbook")
+    #print(trv.heading('#1'))
+    for i, rowid in enumerate(trv.get_children()):
+        if bstart:
+            wb = Workbook()
+            ws1 = wb.active
+            ws1.title = "uploaded files"
+
+        for j, column in enumerate(trv.item(rowid, "values")):
+            if bstart:
+                ws1.column_dimensions[get_column_letter(j+1)].width = column_width[j+1]
+                wcell = ws1.cell(column=j+1, row=i+1, value="{0}".format(trv.heading('#%s' % str(j+1))['text'] ))
+                wcell.font = font_header
+                wcell.fill = fillColorHeader
+            
+            wcell_body = ws1.cell(column=j+1, row=i+2, value="{0}".format(column))
+            if i>0 and i%2 == 1:
+                wcell_body.fill = fillColorStriped
+                 
+        bstart=False
+    
+
+
+    if not bstart: 
+        try:
+            exp_file = os.path.join(export_dir, 'file_sent_%s.xlsx' % dt.strftime(dt.now(),'%Y%m%d'))
+            wb.save(filename=exp_file)
+        except IOError as e:
+            messagebox.showerror("Write File Error", "Unable to write file %s! Check permission or if it is already open! %s" % (os.path.basename(exp_file), str(e)))     
+        else:
+            messagebox.showinfo("Write File Info", "Created file %s!" % os.path.basename(exp_file))     
 
 
 
