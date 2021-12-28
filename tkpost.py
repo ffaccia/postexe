@@ -28,17 +28,14 @@ from utils import round_format_size as rs
 FORMAT = "[ %(asctime)s, %(levelname)s] %(message)s" 
 
                  
-dbFile, DBNAME, conn, cur = (None,)*4
-CODES_OK, extensions, MULTI_FILES, _CODES_OK = (None,)*4
-entry_dir, response_dir, save_dir, file_save, export_dir = (None,)*5
+dbFile, conn, cur = (None,)*3
+entry_dir, response_dir, save_dir, export_dir = (None,)*4
 logs_dir, db_dir, img_dir, data_dir = (None,)*4
-INNER_DIR, RESPONSE_DIR, SAVE_DIR, IMG_DIR, EXPORT_DIR, LOGS_DIR, DATA_DIR, DB_DIR = (None,)*8
 
 global data
 
 im_checked, im_unchecked, trv = (None,)*3
 checkall_btn, uncheckall_btn, upload_again_btn, excel_btn = (None,)*4
-url = None
 allowedFileTypes=(('pdf files', '*.pdf'),)
 
 SAVE_FILE_DB = True   
@@ -52,43 +49,21 @@ root.geometry("%dx%d" % (W_WIDTH, W_HEIGHT))
    
 
 def load_config(file_config):
-    global extensions, CODES_OK, MULTI_FILES, _CODES_OK, im_checked, im_unchecked
-    global DBNAME, response_dir, save_dir, export_dir, url
-    global INNER_DIR, RESPONSE_DIR, SAVE_DIR, IMG_DIR, EXPORT_DIR, LOGS_DIR, DATA_DIR, DB_DIR
-    
+    global data
     with open(file_config, "r") as jsonfile:
         data = json.load(jsonfile)
-        
-        url = data['URL']
-        extensions = data['EXTENSIONS']
-        _CODES_OK = data['_CODES_OK']
-        MULTI_FILES = data['MULTI_FILES']
-        INNER_DIR = eval(data['INNER_DIR'])       #"os.path.join('documents','sviluppo','python','postexe')"
-        RESPONSE_DIR = data['RESPONSE_DIR']
-        SAVE_DIR = data['SAVE_DIR']
-        IMG_DIR = data['IMG_DIR']
-        EXPORT_DIR = data['EXPORT_DIR']
-        LOGS_DIR = data['LOGS_DIR']
         DATA_DIR = data['DATA_DIR']
-        DB_DIR = data['DB_DIR']
-        DBNAME = data['DBNAME']
-    
+
         
 def setup_profile():    
-    global extensions, CODES_OK, MULTI_FILES, _CODES_OK, im_checked, im_unchecked
-    global DBNAME, response_dir, save_dir, export_dir, url
+    global im_checked, im_unchecked
+    global response_dir, save_dir, export_dir
     global logs_dir, db_dir, img_dir, data_dir
     
-    """
-    url = 'https://httpbin.org/post'
-    extensions = ['pdf']
-    CODES_OK = [ v for k,v in requests.codes.__dict__.items() if k in ['OK','CREATED','ACCEPTED']]
-    MULTI_FILES = True
-    """
     
     load_config("test_config.json")
     
-    CODES_OK = [ v for k,v in requests.codes.__dict__.items() if k in _CODES_OK]
+    CODES_OK = [ v for k,v in requests.codes.__dict__.items() if k in data['CODES_OK']]
     #MULTI_FILES = True
 
     try:
@@ -96,7 +71,7 @@ def setup_profile():
         if user_profile_dir and os.path.isdir(user_profile_dir) == True:
             
             try:
-                entry_dir = os.path.join(user_profile_dir, INNER_DIR)
+                entry_dir = os.path.join(user_profile_dir, eval(data['INNER_DIR']))   #"os.path.join('documents','sviluppo','python','postexe')"
                 #inner_dir = os.path.join('documents','sviluppo','python','postexe')
                 if os.path.isdir(entry_dir) == False: 
                     print("innerdir")
@@ -121,43 +96,46 @@ def setup_profile():
     #print(abs_dir)
     os.chdir(entry_dir)
     
-    funchecked = os.path.join(entry_dir, 'img', 'uncheckedn.png')
-    fchecked = os.path.join(entry_dir, 'img', 'checkedn.png')
-    im_checked = ImageTk.PhotoImage(Image.open(fchecked))
-    im_unchecked = ImageTk.PhotoImage(Image.open(funchecked))
     
-    print(funchecked)
-    print(entry_dir)
     try:
-        response_dir = os.path.join(".",RESPONSE_DIR)
+        response_dir = os.path.join(".", data['RESPONSE_DIR'])
         print(response_dir)
         if os.path.isdir(response_dir) == False:
             os.mkdir(response_dir, 755);
         
-        save_dir = os.path.join(".",SAVE_DIR)
+        save_dir = os.path.join(".", data['SAVE_DIR'])
         print(save_dir)
         if os.path.isdir(save_dir) == False:
             os.mkdir(save_dir, 755);
         
-        export_dir = os.path.join(".",EXPORT_DIR)
+        export_dir = os.path.join(".", data['EXPORT_DIR'])
         print(export_dir)
         if os.path.isdir(export_dir) == False:
             os.mkdir(export_dir, 755);
 
-        img_dir = os.path.join(".",IMG_DIR)
+        img_dir = os.path.join(".", data['IMG_DIR'])
         print(img_dir)
         if os.path.isdir(img_dir) == False:
             os.mkdir(img_dir, 755);
+        
+        sh_copy(data['CHECKED'], os.path.join(".","img",data['CHECKED']))
+        sh_copy(data['UNCHECKED'], os.path.join(".","img",data['UNCHECKED']))
+        
             
-        logs_dir = os.path.join(".",LOGS_DIR)
+        logs_dir = os.path.join(".", data['LOGS_DIR'])
         print(logs_dir)
         if os.path.isdir(logs_dir) == False:
             os.mkdir(logs_dir, 755);
             
-        db_dir = os.path.join(".",DB_DIR)
+        db_dir = os.path.join(".", data['DB_DIR'])
         print(db_dir)
         if os.path.isdir(db_dir) == False:
             os.mkdir(db_dir, 755);
+
+        funchecked = os.path.join(entry_dir, 'img', data['UNCHECKED'])
+        fchecked = os.path.join(entry_dir, 'img', data['CHECKED'])
+        im_checked = ImageTk.PhotoImage(Image.open(fchecked))
+        im_unchecked = ImageTk.PhotoImage(Image.open(funchecked))
                         
     except IOError as e:
         msg = "Error creating setup dir img (%s), responses (%s), save (%s), export (%s) in %s" % (img_dir, response_dir, save_dir, export_dir, user_profile_dir)
@@ -172,8 +150,8 @@ def setup_profile():
 
 
 def setup_connection():
-    global dbFile, conn, cur, db_dir, DBNAME
-    dbFile = os.path.join(db_dir, DBNAME)
+    global dbFile, conn, cur, db_dir
+    dbFile = os.path.join(db_dir, data['DBNAME'])
     conn = sqlite3.connect(dbFile)
     cur = conn.cursor()
     
@@ -447,7 +425,7 @@ def setup_frames():
                                     
 
 def upload_files(here_file=None):
-    global file_save
+
     error = False
     save = True
     #os.chdir(entry_dir)
@@ -473,7 +451,7 @@ def upload_files(here_file=None):
         files = (os.path.join(save_dir, here_file),)
         save=False
     else:
-        tk_chooseFile = tk.filedialog.askopenfilenames if MULTI_FILES else filedialog.askopenfilename
+        tk_chooseFile = tk.filedialog.askopenfilenames if data['MULTI_FILES'] else filedialog.askopenfilename
         files=tk_chooseFile(initialdir=get_initial_dir(),
                       title="Please select a file to upload:",
                       filetypes=allowedFileTypes)
@@ -490,7 +468,7 @@ def upload_files(here_file=None):
         ext = ''.join(file.split(".")[-1])
         fbase = ''.join(file.split(".")[:-1])
         print(fbase, ext)
-        if ext not in extensions:
+        if ext not in data['EXTENSIONS']:
             msg = "File %s cannot be sent due to wrong extension: %s!" % (file, ext)
             tk.messagebox.showerror("File Input Error", msg)
             #win32api.MessageBox(0, msg, "Critical Error", 0x00001000)         
@@ -500,7 +478,7 @@ def upload_files(here_file=None):
         
         files = {'file': (file, open(filename, 'rb'), 'application/pdf', {'Expires': '0'})}
         dt_snd = get_timestamp()
-        r = requests.post(url, files=files)
+        r = requests.post(data['URL'], files=files)
         dt_rcv = get_timestamp()
         
         file_response = os.path.join(response_dir, "%s%s" % (fbase, ".response"))

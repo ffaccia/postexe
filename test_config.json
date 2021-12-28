@@ -1,9 +1,9 @@
 {
   "URL": "https://httpbin.org/post",
   "EXTENSIONS" : ["pdf"],
-  "_CODES_OK" : ["OK","CREATED","ACCEPTED"],
+  "CODES_OK" : ["OK","CREATED","ACCEPTED"],
   "MULTI_FILES" : 1,
-  "INNER_DIR" : "os.path.join('documents','sviluppo','python','postexe2')",
+  "INNER_DIR" : "os.path.join('documents','sviluppo','python','postexe')",
   "RESPONSE_DIR" : "responses",
   "SAVE_DIR" : "save",
   "IMG_DIR" : "img",
@@ -13,6 +13,9 @@
   "LOGS_DIR" : "logs",
   "DB_DIR" : "db",
   "LOGS_DIR" : "logs",
+  "CHECKED" : "checkedn.png",
+  "UNCHECKED" : "uncheckedn.png",
+  
   "DBNAME": "coronavirus.db" 
 }
 
