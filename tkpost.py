@@ -2,6 +2,7 @@
 import requests
 import sys
 import os
+import json
 from shutil import copyfile as sh_copy
 import base64
 
@@ -26,76 +27,153 @@ from utils import round_format_size as rs
 
 FORMAT = "[ %(asctime)s, %(levelname)s] %(message)s" 
 
-
                  
-dbFile, conn, cur = None, None, None
-CODES_OK, extensions, MULTI_FILES = None, None, None
-entry_dir, abs_dir, response_dir, save_dir, file_save, export_dir = None, None, None, None, None, None
-im_checked, im_unchecked, trv = None, None, None
-checkall_btn, uncheckall_btn, upload_again_btn, excel_btn = None, None, None, None
+dbFile, DBNAME, conn, cur = (None,)*4
+CODES_OK, extensions, MULTI_FILES, _CODES_OK = (None,)*4
+entry_dir, response_dir, save_dir, file_save, export_dir = (None,)*5
+logs_dir, db_dir, img_dir, data_dir = (None,)*4
+INNER_DIR, RESPONSE_DIR, SAVE_DIR, IMG_DIR, EXPORT_DIR, LOGS_DIR, DATA_DIR, DB_DIR = (None,)*8
+
+global data
+
+im_checked, im_unchecked, trv = (None,)*3
+checkall_btn, uncheckall_btn, upload_again_btn, excel_btn = (None,)*4
 url = None
+allowedFileTypes=(('pdf files', '*.pdf'),)
 
 SAVE_FILE_DB = True   
 SAVE_FILE_DIR = True   
-w_width = 900
-w_height = 600
+W_WIDTH = 900
+W_HEIGHT = 600
 
 root = Tk()
 root.title("PDF 2 WS")
-root.geometry("%dx%d" % (w_width, w_height))
+root.geometry("%dx%d" % (W_WIDTH, W_HEIGHT))
    
-   
-def setup_profile():    
-    global extensions, CODES_OK, MULTI_FILES, im_checked, im_unchecked
-    global response_dir, save_dir, export_dir, url
+
+def load_config(file_config):
+    global extensions, CODES_OK, MULTI_FILES, _CODES_OK, im_checked, im_unchecked
+    global DBNAME, response_dir, save_dir, export_dir, url
+    global INNER_DIR, RESPONSE_DIR, SAVE_DIR, IMG_DIR, EXPORT_DIR, LOGS_DIR, DATA_DIR, DB_DIR
     
+    with open(file_config, "r") as jsonfile:
+        data = json.load(jsonfile)
+        
+        url = data['URL']
+        extensions = data['EXTENSIONS']
+        _CODES_OK = data['_CODES_OK']
+        MULTI_FILES = data['MULTI_FILES']
+        INNER_DIR = eval(data['INNER_DIR'])       #"os.path.join('documents','sviluppo','python','postexe')"
+        RESPONSE_DIR = data['RESPONSE_DIR']
+        SAVE_DIR = data['SAVE_DIR']
+        IMG_DIR = data['IMG_DIR']
+        EXPORT_DIR = data['EXPORT_DIR']
+        LOGS_DIR = data['LOGS_DIR']
+        DATA_DIR = data['DATA_DIR']
+        DB_DIR = data['DB_DIR']
+        DBNAME = data['DBNAME']
+    
+        
+def setup_profile():    
+    global extensions, CODES_OK, MULTI_FILES, _CODES_OK, im_checked, im_unchecked
+    global DBNAME, response_dir, save_dir, export_dir, url
+    global logs_dir, db_dir, img_dir, data_dir
+    
+    """
     url = 'https://httpbin.org/post'
     extensions = ['pdf']
     CODES_OK = [ v for k,v in requests.codes.__dict__.items() if k in ['OK','CREATED','ACCEPTED']]
     MULTI_FILES = True
+    """
+    
+    load_config("test_config.json")
+    
+    CODES_OK = [ v for k,v in requests.codes.__dict__.items() if k in _CODES_OK]
+    #MULTI_FILES = True
 
-    user_profile_dir = os.environ["USERPROFILE"]
-    inner_dir = os.path.join('documents','sviluppo','python','postexe')
-    entry_dir = os.path.join(user_profile_dir, inner_dir)
-    if os.path.isdir(entry_dir) == False:
-          msg = "Setup dir is missing: %s! " % (entry_dir)
-          tk.messagebox.showerror("Setup Error", msg)
-          #win32api.MessageBox(0, msg, "Critical Error", 0x00001000)         
-          raise InputError(msg, msg)    
-    
-    abs_dir = os.path.join(entry_dir,entry_dir) 
+    try:
+        user_profile_dir = os.environ["USERPROFILE"] 
+        if user_profile_dir and os.path.isdir(user_profile_dir) == True:
+            
+            try:
+                entry_dir = os.path.join(user_profile_dir, INNER_DIR)
+                #inner_dir = os.path.join('documents','sviluppo','python','postexe')
+                if os.path.isdir(entry_dir) == False: 
+                    print("innerdir")
+                    print(entry_dir)
+                    os.chdir(user_profile_dir)  
+                    os.makedirs(entry_dir)
+            
+            except:    
+                msg = "Setup dir is missing: %s! " % (entry_dir)
+                tk.messagebox.showerror("Setup Error", msg)
+                raise IOError("Errore Creazione Directory", msg)    
+                
+        else:
+                msg = "User Profile dir is missing! (%s) " % user_profile_dir
+                tk.messagebox.showerror("Setup Error", msg)
+                raise IOError("Errore Creazione Directory", msg)          
+    except:
+        raise IOError("Setup dir is missing (2): %s" % msg) 
+        
+        
+    #abs_dir = os.path.join(entry_dir,entry_dir) 
     #print(abs_dir)
-    os.chdir(abs_dir)
+    os.chdir(entry_dir)
     
-    funchecked = os.path.join(abs_dir, 'img', 'uncheckedn.png')
-    fchecked = os.path.join(abs_dir, 'img', 'checkedn.png')
+    funchecked = os.path.join(entry_dir, 'img', 'uncheckedn.png')
+    fchecked = os.path.join(entry_dir, 'img', 'checkedn.png')
     im_checked = ImageTk.PhotoImage(Image.open(fchecked))
     im_unchecked = ImageTk.PhotoImage(Image.open(funchecked))
     
     print(funchecked)
-    
-    
-    response_dir = os.path.join(".","responses")
-    if os.path.isdir(response_dir) == False:
-        os.mkdir(response_dir, 755);
-    
-    save_dir = os.path.join(".","save")
-    if os.path.isdir(save_dir) == False:
-        os.mkdir(save_dir, 755);
-    
-    export_dir = os.path.join(".","export")
-    if os.path.isdir(export_dir) == False:
-        os.mkdir(export_dir, 755);
-    
-    logName = os.path.join(".", "responses", "responses.log")
+    print(entry_dir)
+    try:
+        response_dir = os.path.join(".",RESPONSE_DIR)
+        print(response_dir)
+        if os.path.isdir(response_dir) == False:
+            os.mkdir(response_dir, 755);
+        
+        save_dir = os.path.join(".",SAVE_DIR)
+        print(save_dir)
+        if os.path.isdir(save_dir) == False:
+            os.mkdir(save_dir, 755);
+        
+        export_dir = os.path.join(".",EXPORT_DIR)
+        print(export_dir)
+        if os.path.isdir(export_dir) == False:
+            os.mkdir(export_dir, 755);
+
+        img_dir = os.path.join(".",IMG_DIR)
+        print(img_dir)
+        if os.path.isdir(img_dir) == False:
+            os.mkdir(img_dir, 755);
+            
+        logs_dir = os.path.join(".",LOGS_DIR)
+        print(logs_dir)
+        if os.path.isdir(logs_dir) == False:
+            os.mkdir(logs_dir, 755);
+            
+        db_dir = os.path.join(".",DB_DIR)
+        print(db_dir)
+        if os.path.isdir(db_dir) == False:
+            os.mkdir(db_dir, 755);
+                        
+    except IOError as e:
+        msg = "Error creating setup dir img (%s), responses (%s), save (%s), export (%s) in %s" % (img_dir, response_dir, save_dir, export_dir, user_profile_dir)
+        msg = e #"Error creating setup dir img (%s), responses (%s), save (%s), export (%s) in %s" % (img_dir, response_dir, save_dir, export_dir, user_profile_dir)
+        tk.messagebox.showerror("Setup Error", msg)
+        raise IOError("Error creating setup dirs", msg)          
+            
+    logName = os.path.join(logs_dir, "responses.log")
     logging.basicConfig(filename=logName, level=logging.DEBUG, format=FORMAT)
 
 
 
 
 def setup_connection():
-    global dbFile, conn, cur
-    dbFile = os.path.join(".", "db", "coronavirus.db")
+    global dbFile, conn, cur, db_dir, DBNAME
+    dbFile = os.path.join(db_dir, DBNAME)
     conn = sqlite3.connect(dbFile)
     cur = conn.cursor()
     
@@ -119,13 +197,45 @@ def setup_connection():
     cur.execute(comm)
 
 
+class CustomDateEntry(DateEntry):
 
-class DateEntry(DateEntry):
-    def get_date(self):
+    def _select(self, event=None):
+        date = self._calendar.selection_get()
+        if date is not None:
+            self._set_text(date.strftime('%m/%d/%Y'))
+            self.event_generate('<<DateEntrySelected>>')
+        self._top_cal.withdraw()
+        if 'readonly' not in self.state():
+            self.focus_set()
+
+
+
+class MyDateEntry(DateEntry):
+    def _validate_date(self):
         if not self.get():
+            return True # IMPORTANT!!! Validation must return True/False otherwise it is turned off by tkinter engine
+        
+        return super()._validate_date()
+
+
+
+class zDateEntry(DateEntry):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        if self.get_date() == None or self.get_date() == "":
+            return None
+            
+    def get_date(self):
+        print("date vale")
+        print(self.get())
+        if not self.get():
+            print("return none")
             return None
         self._validate_date()
+        print("prima parse")
         return self.parse_date(self.get())       
+
 
 
 """
@@ -240,13 +350,13 @@ def setup_frames():
     trv.column("#3", minwidth=50, width=60, stretch=0, anchor=CENTER)
     trv.heading('#3', text="Size")
 
-    trv.column("#4", minwidth=150, width=200, stretch=1)
+    trv.column("#4", minwidth=150, width=150, stretch=1)
     trv.heading('#4', text="dt_snd")
 
-    trv.column("#5", minwidth=150, width=200, stretch=1)
+    trv.column("#5", minwidth=150, width=150, stretch=1)
     trv.heading('#5', text="dt_rcv")
 
-    trv.column("#6", minwidth=50, width=60, stretch=1)
+    trv.column("#6", minwidth=50, width=40, stretch=1)
     trv.heading('#6', text="status")
 
        
@@ -298,14 +408,20 @@ def setup_frames():
     
     lbld = Label(wrapper3, text="Date from...")
     lbld.grid(column=0, row=1, padx=5, pady=5)
-    entda = DateEntry(wrapper3,selectmode='day', date_pattern='Y-mm-d')
+    entda = MyDateEntry(wrapper3,selectmode='day', date_pattern='Y-mm-d')
     entda.grid(column=1, row=1, padx=5, pady=5)
     
+    #entda._set_text(entda._date.strftime('%m/%d/%Y'))    
+    #entda.configure(validate='none')
+
     lbld = Label(wrapper3, text="Date to.....")
     lbld.grid(column=2, row=1, padx=5, pady=5)
-    enta = DateEntry(wrapper3,selectmode='day', date_pattern='Y-mm-d')
+    enta = MyDateEntry(wrapper3,selectmode='day', date_pattern='Y-mm-d')
     enta.grid(column=3, row=1, padx=5, pady=5)
     
+    #enta._set_text(enta._date.strftime('%m/%d/%Y'))    
+    
+    #enta.configure(validate='none')
     
     #done with lambda in order not to make qfile, entda, enta, qstatus globals
     search_btn = Button(wrapper3, text="Search Files", command=lambda:search_files(qfile, entda, enta, qstatus))
@@ -328,7 +444,7 @@ def setup_frames():
     exit_btn.pack(side=tk.RIGHT, padx=10)
     
 
-
+                                    
 
 def upload_files(here_file=None):
     global file_save
@@ -336,13 +452,34 @@ def upload_files(here_file=None):
     save = True
     #os.chdir(entry_dir)
     
+    def get_initial_dir():
+        try:
+            if os.path.isdir(os.path.join(os.environ.get("USERPROFILE"),"download")):
+                initial_dir=os.path.join(os.environ.get("USERPROFILE"),"download")
+            elif os.path.isdir(os.path.join(os.environ.get("USERPROFILE"),"downloads")):
+                initial_dir=os.path.join(os.environ.get("USERPROFILE"),"downloads")
+            elif os.path.isdir(os.environ.get("USERPROFILE")):
+                initial_dir=os.environ.get("USERPROFILE")
+            else:
+                initial_dir=os.getcwd()
+        except:
+            initial_dir=os.getcwd()
+            
+        return initial_dir
+        
+            
     if here_file != None:
         print("herefile ", here_file)
         files = (os.path.join(save_dir, here_file),)
         save=False
     else:
-        files = tk.filedialog.askopenfilenames() if MULTI_FILES else filedialog.askopenfilename()
-
+        tk_chooseFile = tk.filedialog.askopenfilenames if MULTI_FILES else filedialog.askopenfilename
+        files=tk_chooseFile(initialdir=get_initial_dir(),
+                      title="Please select a file to upload:",
+                      filetypes=allowedFileTypes)
+        
+        
+        
     print("here file ")
     print(type(files))    
 
