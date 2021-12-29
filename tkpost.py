@@ -5,6 +5,8 @@ import os
 import json
 from shutil import copyfile as sh_copy
 import base64
+import babel
+import babel.numbers
 
 from datetime import datetime as dt
 import time
@@ -69,11 +71,11 @@ def setup_profile():
     #MULTI_FILES = True
 
     try:
-        user_profile_dir = os.environ["USERPROFILE"] 
+        user_profile_dir = os.getcwd()
         if user_profile_dir and os.path.isdir(user_profile_dir) == True:
             
             try:
-                entry_dir = os.path.join(user_profile_dir, eval(data['INNER_DIR']))   #"os.path.join('documents','sviluppo','python','postexe')"
+                entry_dir = user_profile_dir
                 #inner_dir = os.path.join('documents','sviluppo','python','postexe')
                 if os.path.isdir(entry_dir) == False: 
                     print("innerdir")
@@ -120,8 +122,8 @@ def setup_profile():
         if os.path.isdir(img_dir) == False:
             os.mkdir(img_dir, 755);
         
-        sh_copy(data['CHECKED'], os.path.join(".","img",data['CHECKED']))
-        sh_copy(data['UNCHECKED'], os.path.join(".","img",data['UNCHECKED']))
+        #sh_copy(data['CHECKED'], os.path.join(".","img",data['CHECKED']))
+        #sh_copy(data['UNCHECKED'], os.path.join(".","img",data['UNCHECKED']))
         
             
         logs_dir = os.path.join(".", data['LOGS_DIR'])
