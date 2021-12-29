@@ -31,6 +31,7 @@ FORMAT = "[ %(asctime)s, %(levelname)s] %(message)s"
 dbFile, conn, cur = (None,)*3
 entry_dir, response_dir, save_dir, export_dir = (None,)*4
 logs_dir, db_dir, img_dir, data_dir = (None,)*4
+CODES_OK = None
 
 global data
 
@@ -56,6 +57,7 @@ def load_config(file_config):
 
         
 def setup_profile():    
+    global CODES_OK
     global im_checked, im_unchecked
     global response_dir, save_dir, export_dir
     global logs_dir, db_dir, img_dir, data_dir
@@ -244,7 +246,7 @@ def search_files(qfile, qdatada, qdataa, qstatus):
               WHERE 1=1 
            """
     if qfile != None:
-        query += f" AND lower(filename) LIKE '{qfile}%'"       
+        query += f" AND lower(filename) LIKE '%{qfile}%'"       
 
     if qstatus != "":
         query += f" AND status == '{qstatus}'"       
@@ -425,7 +427,6 @@ def setup_frames():
                                     
 
 def upload_files(here_file=None):
-
     error = False
     save = True
     #os.chdir(entry_dir)
@@ -498,6 +499,7 @@ def upload_files(here_file=None):
         id = record_upload(os.path.basename(filename.lower()), size, dt_snd, dt_rcv, r.status_code)
             
         if r.status_code not in CODES_OK:
+            print("ecco status code %s" %  r.status_code )
             msg = "Upload failed for File %s. status_code: %s!" % (file, r.status_code)
             tk.messagebox.showerror("Failed file upload", msg)
             #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
@@ -547,6 +549,8 @@ def toggleCheck2(opt):
     for rowid in trv.get_children():
         trv.item(rowid, tags=opt)
     toggleDisableButton()
+    refresh_stripes()
+
 
 def countChecked(opt="checked"):
     cnt=0
@@ -609,7 +613,10 @@ def toggleCheck(event):
         else:
             trv.item(rowid, tags="checked")
         toggleDisableButton()
+        refresh_stripes(rowid)
 
+
+def refresh_stripes(rowid=-1):
     for i, rid in enumerate(trv.get_children()):
         if rid != rowid:
             if i%2 == 0:
@@ -764,6 +771,7 @@ def delete_id(qid):
         msg="Are you sure you want to delete these ids? (%s) " % ', '.join(str(id) for id in ids)
     else:
         msg="Are you sure you want to delete this id %d?" % id
+        ids = [id]
     if messagebox.askyesno("Confirm please", msg) == False:
         return False
 
@@ -772,31 +780,36 @@ def delete_id(qid):
         for id in ids:
             print("to delete ", id)
             
-            query=""" SELECT id FROM pdf2file0f WHERE id = ? """ 
+            query=""" SELECT id FROM pdf2ws0f WHERE id = ? """ 
             cur.execute(query, (id,))
             
             if cur.fetchone() != None:
-                query=""" DELETE FROM pdf2file0f WHERE id = ? """ 
-                deleted = cur.execute(query, (id,)).rowcount
-                if deleted != 1:     
-                #if get_affected_rows() != 1:   
-                    msg="Error deleting rows from pdf2file0f. Deleted rows: %d" % deleted
-                    logging.error(msg)
-                    messagebox.showwarning("Delete Error", msg) 
-                    conn.rollback()
-                    logging.error("rollback occurred") 
-                    return True
-    
+                query=""" SELECT id FROM pdf2file0f WHERE id = ? """ 
+                cur.execute(query, (id,))
+                if cur.fetchone() != None:
+                    query=""" DELETE FROM pdf2file0f WHERE id = ? """ 
+                    deleted = cur.execute(query, (id,)).rowcount
+                    if deleted != 1:     
+                    #if get_affected_rows() != 1:   
+                        msg="Error deleting rows from pdf2file0f. Deleted rows: %d" % deleted
+                        logging.error(msg)
+                        messagebox.showerror("Delete Error", msg) 
+                        conn.rollback()
+                        logging.error("rollback occurred") 
+                        return True
+                    logging.info("deleted id %d from pdf2file0f" % id) 
+                
                 query=""" DELETE FROM pdf2ws0f WHERE id = ? """ 
                 deleted = cur.execute(query, (id,)).rowcount
                 if deleted != 1:     
                 #if get_affected_rows() != 1:   
                     msg="Error deleting rows from pdf2ws0f. Deleted rows: %d" % deleted
                     logging.error(msg)
-                    messagebox.showwarning("Delete Error", msg) 
+                    messagebox.showerror("Delete Error", msg) 
                     conn.rollback()
                     logging.error("rollback occurred") 
                     return True
+                logging.info("deleted id %d from pdf2ws0f" % id) 
 
 
     except sqlite3.Error as e:
@@ -861,28 +874,28 @@ def write_workBook():
 
 
 
-try:
-    setup_profile()  
-except IOError as e:
-    msg = "Aborted! creating user profile! Error: %s" % str(e)  
-    logging.critical(msg)  
-    tk.messagebox.showerror("Setup Error", msg) 
-    exit()
+if __name__ == "__main__":
 
-try:
-    setup_connection()  
-except sqlite3.Error as e:
-    msg = "Aborted! Error connecting to db! Error: %s" % str(e)  
-    logging.critical(msg)  
-    tk.messagebox.showerror("Setup Error", msg) 
-    exit()
+    try:
+        setup_profile()  
+    except IOError as e:
+        msg = "Aborted! creating user profile! Error: %s" % str(e)  
+        logging.critical(msg)  
+        tk.messagebox.showerror("Setup Error", msg) 
+        exit()
+    
+    try:
+        setup_connection()  
+    except sqlite3.Error as e:
+        msg = "Aborted! Error connecting to db! Error: %s" % str(e)  
+        logging.critical(msg)  
+        tk.messagebox.showerror("Setup Error", msg) 
+        exit()
 
  
- 
-setup_frames()
+    setup_frames()
+    root.mainloop()
 
-
-root.mainloop()
 
 
 
