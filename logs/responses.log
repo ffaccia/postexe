@@ -1,0 +1,38 @@
+[ 2021-12-28 18:35:23,063, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-28 18:35:23,569, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 9615
+[ 2021-12-28 18:35:25,030, ERROR] Upload Successfull for File ricevuta_bonifico_tesseramento_ancora_italia.pdf. status_code: 200!
+[ 2021-12-28 18:35:25,054, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-28 18:35:25,632, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 23156
+[ 2021-12-28 18:35:26,366, ERROR] Upload Successfull for File document.pdf. status_code: 200!
+[ 2021-12-29 12:42:06,932, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:42:07,564, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 23156
+[ 2021-12-29 12:45:31,362, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:45:31,947, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 23156
+[ 2021-12-29 12:45:42,799, ERROR] Upload failed for File document.pdf. status_code: 200!
+[ 2021-12-29 12:45:42,807, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:45:43,386, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 23156
+[ 2021-12-29 12:45:45,454, ERROR] Upload failed for File document.pdf. status_code: 200!
+[ 2021-12-29 12:47:44,090, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:47:44,578, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 9615
+[ 2021-12-29 12:49:24,770, ERROR] Upload failed for File ricevuta_bonifico_tesseramento_ancora_italia.pdf. status_code: 200!
+[ 2021-12-29 12:51:37,303, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:51:37,908, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 23156
+[ 2021-12-29 12:53:45,081, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:53:46,053, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 491649
+[ 2021-12-29 12:54:25,580, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:54:26,616, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 491649
+[ 2021-12-29 12:54:29,907, ERROR] Upload Successfull for File 49_46_consenso_al_trattamento_dati_-_link_n_2.pdf. status_code: 200!
+[ 2021-12-29 12:56:13,982, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:56:14,908, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 330373
+[ 2021-12-29 12:56:17,284, ERROR] Upload Successfull for File 44_11_richiesta_di_visita_medica_-_link_1_buono.pdf. status_code: 200!
+[ 2021-12-29 12:59:14,148, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 12:59:15,154, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 330373
+[ 2021-12-29 12:59:17,284, ERROR] Upload Successfull for File 44_11_richiesta_di_visita_medica_-_link_1_buono.pdf. status_code: 200!
+[ 2021-12-29 14:31:30,659, INFO] deleted id 17 from pdf2file0f
+[ 2021-12-29 14:31:30,659, INFO] deleted id 17 from pdf2ws0f
+[ 2021-12-29 14:31:30,659, INFO] deleted id 19 from pdf2ws0f
+[ 2021-12-29 14:38:56,088, INFO] deleted id 27 from pdf2file0f
+[ 2021-12-29 14:38:56,089, INFO] deleted id 27 from pdf2ws0f
+[ 2021-12-29 14:39:09,374, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2021-12-29 14:39:10,275, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 272821
+[ 2021-12-29 14:39:12,131, ERROR] Upload Successfull for File 19_08_dichiarazione_sostitutiva_anamnestico_-_link_5_buono.pdf. status_code: 200!
