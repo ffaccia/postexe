@@ -3,7 +3,6 @@ import requests
 import sys
 import os
 import json
-import re
 from shutil import copyfile as sh_copy
 import base64
 import babel
@@ -436,98 +435,8 @@ def setup_frames():
     exit_btn.pack(side=tk.RIGHT, padx=10)
     
 
-def get_headers_fetch():
-    headers = {}
-    headers['X-CSRF-token'] = 'FETCH'
+                                    
 
-    client_id_secret = "%s:%s" % (data['CLIENT_ID'], data['CLIENT_SECRET'])
-    headers['Authorization'] = 'Basic %s' % base64.b64encode(client_id_secret.encode('ascii')).decode('utf-8')
-
-    return headers
-    
-
-    
-def get_headers_post(token):
-    headers = {}
-    headers['X-CSRF-token'] = token
-
-    client_id_secret = "%s:%s" % (data['CLIENT_ID'], data['CLIENT_SECRET'])
-    headers['Authorization'] = 'Basic %s' % base64.b64encode(client_id_secret.encode('ascii')).decode('utf-8')
-
-    return headers
-    
-    
-def make_post(fbase, realfile):
-    ret = {}
-    ret["response"] = ""
-    ret["vret"] = 0
-    
-    
-    template_body = '''
-        {
-        "vbeln": "",
-            "file": "",
-            "nomefile": "",
-            "tipo": ""
-        }
-        '''
-    
-    #base64.b64encode(open(realfile,"rb").read())
-
-    payload = json.loads(template_body)
-    payload["vbeln"] = fbase
-    payload["file"] = base64.b64encode(open(realfile,"rb").read())
-    payload["nomefile"] = os.path.basename(realfile)
-    payload["tipo"] = "NPRV"
-    
-    
-    logging.info("%s " % payload)
-    
-    headers=get_headers_fetch()
-    #r = requests.get(data['URL_POST_CEVA_TEST'], headers=headers)
-    r = requests.get(data['URL'], headers=headers)
-    
-    if r.status_code != 200:        
-        msg = "Error get call for retrieving Token! status_code != 200: %s!" % r.status_code
-        tk.messagebox.showerror("Failed file upload", msg)
-        #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
-        logging.error(msg) 
-        return ret
-    
-    token = r.headers.get("X-CSRF-token", None)
-    if token == None:        
-        msg = "Error retrieving TOKEN from Sap! "
-        tk.messagebox.showerror("Failed file upload", msg)
-        #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
-        logging.error(msg) 
-        return ret
-    
-    headers=get_headers_fetch(r["X-CSRF-token"])    
-    r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, data=payload)
-
-    if r.status_code != 200:        
-        msg = "Error post call for sending file! %s " % fbase
-        tk.messagebox.showerror("Failed file upload", msg)
-        #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
-        logging.error(msg) 
-        return ret
-
-    ret["response"] = r
-    ret["vret"] = True 
-    return ret
-    
-    
-           
-def make_delete():
-    pass                                   
-
-
-def test_file(file):
-    regex = re.compile(r'[0-9]{10}.pdf$', re.IGNORECASE)
-    result = regex.match(file)
-    return True if result != None else False
-    
-    
 def upload_files(here_file=None):
     error = False
     save = True
@@ -570,16 +479,6 @@ def upload_files(here_file=None):
         file = os.path.basename(filename).lower()
         ext = ''.join(file.split(".")[-1])
         fbase = ''.join(file.split(".")[:-1])
-        
-        
-        if not test_file(file):
-            msg = "File %s cannot be chosen because expected files are like this: '0187123456.pdf'!" % file
-            tk.messagebox.showerror("File Input Error", msg)
-            #win32api.MessageBox(0, msg, "Critical Error", 0x00001000)         
-            logging.error(msg) 
-            break
- 
-
         print(fbase, ext)
         if ext not in data['EXTENSIONS']:
             msg = "File %s cannot be sent due to wrong extension: %s!" % (file, ext)
@@ -588,16 +487,11 @@ def upload_files(here_file=None):
             logging.error(msg) 
             break
             
-        ret = make_post(fbase, abs_file)
-        r = ret["response"]
         
-        
-        """
         files_ = {'file': (file, open(filename, 'rb'), 'application/pdf', {'Expires': '0'})}
         dt_snd = get_timestamp()
         r = requests.post(data['URL'], files=files_)
         dt_rcv = get_timestamp()
-        """
         
         file_response = os.path.join(response_dir, "%s%s" % (fbase, ".response"))
 
