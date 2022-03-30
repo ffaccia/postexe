@@ -10,6 +10,7 @@ import babel.numbers
 
 from datetime import datetime as dt
 import time
+from dotenv import load_dotenv
 
 import sqlite3
 import logging
@@ -28,6 +29,11 @@ from PIL import ImageTk, Image
 from utils import round_format_size as rs
 
 FORMAT = "[ %(asctime)s, %(levelname)s] %(message)s" 
+
+
+
+load_dotenv()
+CONFIGURATION_FILE = os.getenv('CONFIGURATION_FILE')
 
                  
 dbFile, conn, cur = (None,)*3
@@ -65,7 +71,10 @@ def setup_profile():
     global logs_dir, db_dir, img_dir, data_dir
     
     
-    load_config("test_config.json")
+    #ff, modified at 20220328
+    #load_config("test_config.json")
+    load_config(CONFIGURATION_FILE)
+    
     
     CODES_OK = [ v for k,v in requests.codes.__dict__.items() if k in data['CODES_OK']]
     #MULTI_FILES = True
@@ -479,9 +488,9 @@ def upload_files(here_file=None):
             break
             
         
-        files = {'file': (file, open(filename, 'rb'), 'application/pdf', {'Expires': '0'})}
+        files_ = {'file': (file, open(filename, 'rb'), 'application/pdf', {'Expires': '0'})}
         dt_snd = get_timestamp()
-        r = requests.post(data['URL'], files=files)
+        r = requests.post(data['URL'], files=files_)
         dt_rcv = get_timestamp()
         
         file_response = os.path.join(response_dir, "%s%s" % (fbase, ".response"))

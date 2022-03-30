@@ -2,6 +2,7 @@ Include/
 build/
 dist/
 Lib/
+test/
 pyvenv.cfg
 Scripts/
 __pycache__

@@ -1,5 +1,6 @@
 {
-  "URL": "https://httpbin.org/post",
+  "URL": "https://webhook.site/0a144bdb-da97-4808-99b8-e4f8a5e03a7a",
+  "URL_PROD": "https://httpbin.org/post",
   "EXTENSIONS" : ["pdf"],
   "CODES_OK" : ["OK","CREATED","ACCEPTED"],
   "MULTI_FILES" : 1,

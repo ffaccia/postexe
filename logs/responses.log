@@ -36,3 +36,12 @@
 [ 2021-12-29 14:39:09,374, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
 [ 2021-12-29 14:39:10,275, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 272821
 [ 2021-12-29 14:39:12,131, ERROR] Upload Successfull for File 19_08_dichiarazione_sostitutiva_anamnestico_-_link_5_buono.pdf. status_code: 200!
+[ 2022-03-28 13:13:24,382, DEBUG] Starting new HTTPS connection (1): webhook.site:443
+[ 2022-03-28 13:13:25,900, DEBUG] https://webhook.site:443 "POST /0a144bdb-da97-4808-99b8-e4f8a5e03a7a HTTP/1.1" 200 None
+[ 2022-03-28 13:13:28,073, ERROR] Upload Successfull for File pascarella_sonetti.pdf. status_code: 200!
+[ 2022-03-28 15:29:18,292, DEBUG] Starting new HTTPS connection (1): webhook.site:443
+[ 2022-03-28 15:29:19,603, DEBUG] https://webhook.site:443 "POST /0a144bdb-da97-4808-99b8-e4f8a5e03a7a HTTP/1.1" 200 None
+[ 2022-03-28 15:29:23,527, ERROR] Upload Successfull for File faccia_skill_2018.pdf. status_code: 200!
+[ 2022-03-28 15:32:38,425, DEBUG] Starting new HTTPS connection (1): httpbin.org:443
+[ 2022-03-28 15:32:39,721, DEBUG] https://httpbin.org:443 "POST /post HTTP/1.1" 200 1338754
+[ 2022-03-28 15:32:41,922, ERROR] Upload Successfull for File pascarella_sonetti.pdf. status_code: 200!

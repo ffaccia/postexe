@@ -4,18 +4,18 @@
 block_cipher = None
 
 added_files = [
-         ( './test_config.json', '.' ),
+         ( './test_config.json', '.' ), 
+         ( './test_config_bin.json', '.' ), 
+         ( './.env', '.' ), 
          ( './utils.py', '.' ),
-         ( './img/*png', 'img' ),
-         ( './db/*.*', 'db' ),
-         ( './export/*.*', 'export' ),
-         ( './logs/*.*', 'logs' ),
-         ( './responses/*.*', 'responses' ),
-         ( './save/*.*', 'save' ),
+         ( './img', 'img' ),
+         ( './db', 'db' ),
+         ( './export', 'export' ),
+         ( './logs', 'logs' ),
+         ( './responses', 'responses' ),
+         ( './save', 'save' )
          ]
-
-
-
+         
 a = Analysis(['tkpost.py'],
              pathex=[],
              binaries=[],
@@ -54,3 +54,7 @@ coll = COLLECT(exe,
                upx=True,
                upx_exclude=[],
                name='tkpost')
+
+print("################################################")
+print(a.datas)
+
