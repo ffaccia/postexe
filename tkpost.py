@@ -454,13 +454,16 @@ def get_headers_post(token):
     client_id_secret = "%s:%s" % (data['CLIENT_ID'], data['CLIENT_SECRET'])
     headers['Authorization'] = 'Basic %s' % base64.b64encode(client_id_secret.encode('ascii')).decode('utf-8')
 
+    headers['Accept'] = 'application/json' 
+    headers['Content-Type'] = 'application/json' 
+
     return headers
     
     
 def make_post(fbase, realfile):
     ret = {}
     ret["response"] = ""
-    ret["vret"] = 0
+    ret["vret"] = False
     
     
     template_body = '''
@@ -478,15 +481,23 @@ def make_post(fbase, realfile):
     payload["vbeln"] = fbase
     payload["file"] = base64.b64encode(open(realfile,"rb").read())
     payload["nomefile"] = os.path.basename(realfile)
-    payload["tipo"] = "NPRV"
+    payload["tipo"] = "DDT"
     
     
     logging.info("%s " % payload)
     
     headers=get_headers_fetch()
-    #r = requests.get(data['URL_POST_CEVA_TEST'], headers=headers)
-    r = requests.get(data['URL'], headers=headers)
+    r = requests.get(data['URL_POST_CEVA_TEST'], headers=headers)
+    #r = requests.get(data['URL'], headers=headers)
+
+    #print(r.request.headers)
+    #print("------------------------------------------------")
+    #print(r.headers)
     
+    #print(r.cookies['JSESSIONID'])
+    jsessionid = r.cookies['JSESSIONID']
+    #vcapid = r.cookies['__VCAP_ID__']
+
     if r.status_code != 200:        
         msg = "Error get call for retrieving Token! status_code != 200: %s!" % r.status_code
         tk.messagebox.showerror("Failed file upload", msg)
@@ -495,6 +506,7 @@ def make_post(fbase, realfile):
         return ret
     
     token = r.headers.get("X-CSRF-token", None)
+    logging.error("token: %s" % token) 
     if token == None:        
         msg = "Error retrieving TOKEN from Sap! "
         tk.messagebox.showerror("Failed file upload", msg)
@@ -502,17 +514,36 @@ def make_post(fbase, realfile):
         logging.error(msg) 
         return ret
     
-    headers=get_headers_fetch(r["X-CSRF-token"])    
-    r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, data=payload)
+    #cookies = dict(JSESSIONID=jsessionid)
 
+    #headers=get_headers_post(r.headers["X-CSRF-token"])    
+    headers=get_headers_post(token)    
+    logging.error(headers)
+    #print(payload)
+
+    jar = requests.cookies.RequestsCookieJar()
+    jar.set('JSESSIONID', jsessionid, path='/http')
+    #jar.set('__VCAP_ID__', vcapid, path='/http')
+
+    #r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=headers, data=payload)
+    r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, data=payload)
+    ret["response"] = r
+
+    print(r.request.headers)
+    print("------------------------------------------------")
+    print(r.headers)
+    print("------------------------------------------------")
+    print(r.json())
+    print("------------------------------------------------")
+    print(r.content)
     if r.status_code != 200:        
-        msg = "Error post call for sending file! %s " % fbase
+        msg = "Error post call for sending file %s! status_code: %s " % (fbase, r.status_code)
         tk.messagebox.showerror("Failed file upload", msg)
         #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
         logging.error(msg) 
         return ret
 
-    ret["response"] = r
+
     ret["vret"] = True 
     return ret
     
@@ -523,7 +554,7 @@ def make_delete():
 
 
 def test_file(file):
-    regex = re.compile(r'[0-9]{10}.pdf$', re.IGNORECASE)
+    regex = re.compile(r'[0-9]{9,25}.pdf$', re.IGNORECASE)
     result = regex.match(file)
     return True if result != None else False
     

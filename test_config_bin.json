@@ -2,7 +2,7 @@
   "URL": "https://httpbin.org/post",
   "URL_PROD": "https://httpbin.org/post",
   "CLIENT_ID": "sb-113bbb59-48dc-4f58-9a9e-66dbbb3cdbfb!b131464|it-rt-sap-cloud-foundry-dev-qua-fauoq769!b117912",
-  "CLIENT_SECRET": "francesco",
+  "CLIENT_SECRET": "0e6b80e9-326a-48dc-8a5a-ddd611821fbf$BPHG8W0ZVJiT2OEV5Jw744TJNH3032ydUZOe8bs-r_Q=",
   "URL_POST_CEVA_TEST": "https://sap-cloud-foundry-dev-qua-fauoq769.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/InsertAttachment",
   "URL_DEL_CEVA_TEST": "https://sap-cloud-foundry-dev-qua-fauoq769.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/DeleteAttachment",
   "EXTENSIONS" : ["pdf"],
