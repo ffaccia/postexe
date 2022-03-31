@@ -447,12 +447,13 @@ def get_headers_fetch():
     
 
     
-def get_headers_post(token):
+def get_headers_post(tok):
     headers = {}
-    headers['X-CSRF-token'] = token
+    headers['X-CSRF-token'] = tok
 
     client_id_secret = "%s:%s" % (data['CLIENT_ID'], data['CLIENT_SECRET'])
     headers['Authorization'] = 'Basic %s' % base64.b64encode(client_id_secret.encode('ascii')).decode('utf-8')
+    #headers['Authorization'] = "Basic c2ItMTEzYmJiNTktNDhkYy00ZjU4LTlhOWUtNjZkYmJiM2NkYmZiIWIxMzE0NjR8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktZGV2LXF1YS1mYXVvcTc2OSFiMTE3OTEyOjBlNmI4MGU5LTMyNmEtNDhkYy04YTVhLWRkZDYxMTgyMWZiZiRCUEhHOFcwWlZKaVQyT0VWNUp3NzQ0VEpOSDMwMzJ5ZFVaT2U4YnMtcl9RPQ=="
 
     headers['Accept'] = 'application/json' 
     headers['Content-Type'] = 'application/json' 
@@ -466,7 +467,7 @@ def make_post(fbase, realfile):
     ret["vret"] = False
     
     
-    template_body = '''
+    template_bod = '''
         {
         "vbeln": "",
             "file": "",
@@ -475,15 +476,21 @@ def make_post(fbase, realfile):
         }
         '''
     
+    payload = {}
+
     #base64.b64encode(open(realfile,"rb").read())
 
-    payload = json.loads(template_body)
+    #payload = json.loads(template_body)
     payload["vbeln"] = fbase
-    payload["file"] = base64.b64encode(open(realfile,"rb").read())
+    payload["file"] = base64.b64encode(open(realfile,"rb").read()).decode('utf8')
     payload["nomefile"] = os.path.basename(realfile)
     payload["tipo"] = "DDT"
     
-    
+    with open(r"C:\Users\f.faccia\Downloads\ff0187092455.json", 'w') as outfile:
+        outfile.write(json.dumps(payload))
+
+    print(type(payload))
+
     logging.info("%s " % payload)
     
     headers=get_headers_fetch()
@@ -495,7 +502,7 @@ def make_post(fbase, realfile):
     #print(r.headers)
     
     #print(r.cookies['JSESSIONID'])
-    jsessionid = r.cookies['JSESSIONID']
+
     #vcapid = r.cookies['__VCAP_ID__']
 
     if r.status_code != 200:        
@@ -505,8 +512,8 @@ def make_post(fbase, realfile):
         logging.error(msg) 
         return ret
     
+    jsessionid = r.cookies['JSESSIONID']
     token = r.headers.get("X-CSRF-token", None)
-    logging.error("token: %s" % token) 
     if token == None:        
         msg = "Error retrieving TOKEN from Sap! "
         tk.messagebox.showerror("Failed file upload", msg)
@@ -514,6 +521,7 @@ def make_post(fbase, realfile):
         logging.error(msg) 
         return ret
     
+    logging.error("token: %s" % token) 
     #cookies = dict(JSESSIONID=jsessionid)
 
     #headers=get_headers_post(r.headers["X-CSRF-token"])    
@@ -526,14 +534,17 @@ def make_post(fbase, realfile):
     #jar.set('__VCAP_ID__', vcapid, path='/http')
 
     #r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=headers, data=payload)
-    r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, data=payload)
+    #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
+    #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
+    #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
+    r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=get_headers_post(token), data=json.dumps(payload))
     ret["response"] = r
 
     print(r.request.headers)
     print("------------------------------------------------")
     print(r.headers)
     print("------------------------------------------------")
-    print(r.json())
+    #print(r.json())
     print("------------------------------------------------")
     print(r.content)
     if r.status_code != 200:        
