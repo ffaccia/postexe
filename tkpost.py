@@ -505,7 +505,7 @@ def make_post(fbase, realfile):
 
     #vcapid = r.cookies['__VCAP_ID__']
 
-    if r.status_code != 200:        
+    if r.status_code not in CODES_OK:       
         msg = "Error get call for retrieving Token! status_code != 200: %s!" % r.status_code
         tk.messagebox.showerror("Failed file upload", msg)
         #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
@@ -547,7 +547,8 @@ def make_post(fbase, realfile):
     #print(r.json())
     print("------------------------------------------------")
     print(r.content)
-    if r.status_code != 200:        
+    
+    if r.status_code not in CODES_OK:       
         msg = "Error post call for sending file %s! status_code: %s " % (fbase, r.status_code)
         tk.messagebox.showerror("Failed file upload", msg)
         #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
@@ -565,7 +566,7 @@ def make_delete():
 
 
 def test_file(file):
-    regex = re.compile(r'[0-9]{9,25}.pdf$', re.IGNORECASE)
+    regex = re.compile(r'[0-9]{9,10}.pdf$', re.IGNORECASE)
     result = regex.match(file)
     return True if result != None else False
     
