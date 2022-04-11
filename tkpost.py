@@ -39,8 +39,13 @@ CONFIGURATION_FILE = os.getenv('CONFIGURATION_FILE')
                  
 dbFile, conn, cur = (None,)*3
 entry_dir, response_dir, save_dir, export_dir = (None,)*4
-logs_dir, db_dir, img_dir, data_dir = (None,)*4
-CODES_OK = None
+logs_dir, db_dir, img_dir, data_dir, logs_file = (None,)*5
+
+#save base64 file in pdf2file0f and log base64 to responses.log
+INSERT_BASE64, LOG_BASE64 = None, None
+
+CODES_POST = None
+CODES_DELETE = None
 
 global data
 
@@ -48,9 +53,9 @@ im_checked, im_unchecked, trv = (None,)*3
 checkall_btn, uncheckall_btn, upload_again_btn, excel_btn = (None,)*4
 allowedFileTypes=(('pdf files', '*.pdf'),)
 
-SAVE_FILE_DB = True   
+
 SAVE_FILE_DIR = True   
-W_WIDTH = 900
+W_WIDTH = 850
 W_HEIGHT = 600
 
 root = Tk()
@@ -62,22 +67,27 @@ def load_config(file_config):
     global data
     with open(file_config, "r") as jsonfile:
         data = json.load(jsonfile)
-        DATA_DIR = data['DATA_DIR']
+
 
         
 def setup_profile():    
-    global CODES_OK
+    global CODES_POST
+    global CODES_DELETE
     global im_checked, im_unchecked
     global response_dir, save_dir, export_dir
-    global logs_dir, db_dir, img_dir, data_dir
+    global logs_dir, db_dir, img_dir, data_dir, logs_file, INSERT_BASE64, LOG_BASE64
     
     
     #ff, modified at 20220328
     #load_config("test_config.json")
     load_config(CONFIGURATION_FILE)
     
-    
-    CODES_OK = [ v for k,v in requests.codes.__dict__.items() if k in data['CODES_OK']]
+    INSERT_BASE64 = data["INSERT_BASE64"]
+    LOG_BASE64 = data["LOG_BASE64"]
+    DATA_DIR = data['DATA_DIR']  
+    logs_file = data['LOGS_FILE']  
+    CODES_POST = [ v for k,v in requests.codes.__dict__.items() if k in data['CODES_POST']]
+    CODES_DELETE = [ v for k,v in requests.codes.__dict__.items() if k in data['CODES_DELETE']]
     #MULTI_FILES = True
 
     try:
@@ -157,7 +167,7 @@ def setup_profile():
         tk.messagebox.showerror("Setup Error", msg)
         raise IOError("Error creating setup dirs", msg)          
             
-    logName = os.path.join(logs_dir, "responses.log")
+    logName = os.path.join(logs_dir, logs_file)
     logging.basicConfig(filename=logName, level=logging.DEBUG, format=FORMAT)
 
 
@@ -175,7 +185,8 @@ def setup_connection():
                                 size     VARCHAR(10),
                                 dt_snd   TEXT,
                                 dt_rcv   TEXT,
-                                status   INTEGER)
+                                status   INTEGER,
+                                action   VARCHAR(20))
            """
     cur.execute(comm)
 
@@ -238,11 +249,12 @@ DateEntry(scroll_frame, width = 25, background = 'LightCyan3',
 
 
                     
-def search_files(qfile, qdatada, qdataa, qstatus):
+def search_files(qfile, qdatada, qdataa, qstatus, qaction):
     qfile = qfile.get().lower()
     qdatada = qdatada.get()
     qdataa = qdataa.get() #.replace("/")
     qstatus = qstatus.get()
+    qaction = qaction.get()
     
     print(qdatada)
     
@@ -254,11 +266,14 @@ def search_files(qfile, qdatada, qdataa, qstatus):
             qstatus=0
 
         
-    query=f""" SELECT id, filename, size, dt_snd, dt_rcv, status FROM pdf2ws0f
+    query=f""" SELECT id, filename, size, dt_snd, dt_rcv, status, action FROM pdf2ws0f
               WHERE 1=1 
            """
     if qfile != None:
         query += f" AND lower(filename) LIKE '%{qfile}%'"       
+
+    if qaction != None:
+        query += f" AND lower(action) LIKE '%{qaction}%'"       
 
     if qstatus != "":
         query += f" AND status == '{qstatus}'"       
@@ -288,7 +303,7 @@ def setup_frames():
     global trv, checkall_btn, uncheckall_btn, upload_again_btn, excel_btn
 
     wrapper1 = LabelFrame(root, text="Last Sent Pdf")
-    wrapper2 = LabelFrame(root,  text="Upload Pdf")
+    wrapper2 = LabelFrame(root,  text="Upload/Remove Pdf")
     wrapper3 = LabelFrame(root,  text="Search for Pdf")
     wrapper4 = LabelFrame(root,  text="Remove entry")
     
@@ -303,9 +318,10 @@ def setup_frames():
     
     qfile = StringVar()
     qstatus = StringVar()
+    qaction = StringVar()
     qid = StringVar()
         
-    trv = ttk.Treeview(wrapper1, columns=(1,2,3,4,5,6))
+    trv = ttk.Treeview(wrapper1, columns=(1,2,3,4,5,6,7))
     
     vsb = ttk.Scrollbar(wrapper1, orient="vertical", command=trv.yview)
     vsb.pack(side='right', fill='y')
@@ -336,7 +352,7 @@ def setup_frames():
     trv.column("#1", minwidth=30, width=50, stretch=0, anchor=CENTER)
     trv.heading('#1', text="Id")
 
-    trv.column("#2", minwidth=200, width=300, stretch=1)
+    trv.column("#2", minwidth=220, width=220, stretch=1)
     trv.heading('#2', text="File")
 
     trv.column("#3", minwidth=50, width=60, stretch=0, anchor=CENTER)
@@ -348,8 +364,11 @@ def setup_frames():
     trv.column("#5", minwidth=150, width=150, stretch=1)
     trv.heading('#5', text="dt_rcv")
 
-    trv.column("#6", minwidth=50, width=40, stretch=1)
+    trv.column("#6", minwidth=40, width=40, stretch=1)
     trv.heading('#6', text="status")
+
+    trv.column("#7", minwidth=50, width=50, stretch=1)
+    trv.heading('#7', text="action")
 
        
     trv.pack_propagate(0)
@@ -384,8 +403,14 @@ def setup_frames():
     lblf = Label(wrapper2, text="Upload file...")
     lblf.grid(column=0, row=0, padx=5, pady=5)
     
-    upload_btn = Button(wrapper2, text="Upload", command=upload_files)
+    upload_btn = Button(wrapper2, text="Upload", command=lambda:upload_remove_files("upload"))
     upload_btn.grid(column=1, row=0, padx=5, pady=5)
+    
+    lblf = Label(wrapper2, text="Remove file...")
+    lblf.grid(column=2, row=0, padx=5, pady=5)
+    
+    remove_btn = Button(wrapper2, text="Remove", command=lambda:upload_remove_files("remove"))
+    remove_btn.grid(column=3, row=0, padx=5, pady=5)
     
     
     lblf = Label(wrapper3, text="FileName...")
@@ -397,6 +422,11 @@ def setup_frames():
     lbls.grid(column=2, row=0, padx=5, pady=5)
     ents = Entry(wrapper3, textvariable=qstatus)
     ents.grid(column=3, row=0, padx=5, pady=5)
+    
+    lbla = Label(wrapper3, text="Action.....")
+    lbla.grid(column=4, row=0, padx=5, pady=5)
+    enta = Entry(wrapper3, textvariable=qaction)
+    enta.grid(column=5, row=0, padx=5, pady=5)
     
     lbld = Label(wrapper3, text="Date from...")
     lbld.grid(column=0, row=1, padx=5, pady=5)
@@ -416,7 +446,7 @@ def setup_frames():
     #enta.configure(validate='none')
     
     #done with lambda in order not to make qfile, entda, enta, qstatus globals
-    search_btn = Button(wrapper3, text="Search Files", command=lambda:search_files(qfile, entda, enta, qstatus))
+    search_btn = Button(wrapper3, text="Search Files", command=lambda:search_files(qfile, entda, enta, qstatus, qaction))
     search_btn.grid(column=0, row=2, padx=5, pady=5)
     clear_btn = Button(wrapper3, text="Clear", command=clear)
     clear_btn.grid(column=1, row=2, padx=5, pady=5)
@@ -491,7 +521,8 @@ def make_post(fbase, realfile):
 
     print(type(payload))
 
-    logging.info("%s " % payload)
+    if LOG_BASE64:
+        logging.info("%s " % payload)
     
     headers=get_headers_fetch()
     r = requests.get(data['URL_POST_CEVA_TEST'], headers=headers)
@@ -505,7 +536,7 @@ def make_post(fbase, realfile):
 
     #vcapid = r.cookies['__VCAP_ID__']
 
-    if r.status_code not in CODES_OK:       
+    if r.status_code not in CODES_POST:       
         msg = "Error get call for retrieving Token! status_code != 200: %s!" % r.status_code
         tk.messagebox.showerror("Failed file upload", msg)
         #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
@@ -547,8 +578,95 @@ def make_post(fbase, realfile):
     #print(r.json())
     print("------------------------------------------------")
     print(r.content)
+
+    if r.status_code not in CODES_POST:       
+        msg = "Error post call for sending file %s! status_code: %s " % (fbase, r.status_code)
+        tk.messagebox.showerror("Failed file upload", msg)
+        #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
+        logging.error(msg) 
+        return ret
+
+
+    ret["vret"] = True 
+    return ret
     
-    if r.status_code not in CODES_OK:       
+
+    
+def make_delete(fbase, realfile):
+    ret = {}
+    ret["response"] = ""
+    ret["vret"] = False
+    
+
+    payload = {}
+
+
+    #payload = json.loads(template_body)
+    payload["vbeln"] = fbase
+    payload["nomefile"] = os.path.basename(realfile)
+    payload["tipo"] = "DDT"
+    
+    
+    print(type(payload))
+
+    logging.info("%s " % payload)
+    
+    headers=get_headers_fetch()
+    r = requests.get(data['URL_DEL_CEVA_TEST'], headers=headers)
+    #r = requests.get(data['URL'], headers=headers)
+
+    #print(r.request.headers)
+    #print("------------------------------------------------")
+    #print(r.headers)
+    
+    #print(r.cookies['JSESSIONID'])
+
+    #vcapid = r.cookies['__VCAP_ID__']
+
+    if r.status_code not in CODES_DELETE:       
+        msg = "Error get call for retrieving Token! status_code != 200: %s!" % r.status_code
+        tk.messagebox.showerror("Failed file upload", msg)
+        #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
+        logging.error(msg) 
+        return ret
+    
+    jsessionid = r.cookies['JSESSIONID']
+    token = r.headers.get("X-CSRF-token", None)
+    if token == None:        
+        msg = "Error retrieving TOKEN from Sap! "
+        tk.messagebox.showerror("Failed file upload", msg)
+        #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
+        logging.error(msg) 
+        return ret
+    
+    logging.error("token: %s" % token) 
+    #cookies = dict(JSESSIONID=jsessionid)
+
+    #headers=get_headers_post(r.headers["X-CSRF-token"])    
+    headers=get_headers_post(token)    
+    logging.error(headers)
+    #print(payload)
+
+    jar = requests.cookies.RequestsCookieJar()
+    jar.set('JSESSIONID', jsessionid, path='/http')
+    #jar.set('__VCAP_ID__', vcapid, path='/http')
+
+    #r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=headers, data=payload)
+    #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
+    #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
+    #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
+    r = requests.delete(data['URL_DEL_CEVA_TEST'], cookies=jar, headers=get_headers_post(token), data=json.dumps(payload))
+    ret["response"] = r
+
+    print(r.request.headers)
+    print("------------------------------------------------")
+    print(r.headers)
+    print("------------------------------------------------")
+    #print(r.json())
+    print("------------------------------------------------")
+    print(r.content)
+    
+    if r.status_code not in CODES_DELETE:       
         msg = "Error post call for sending file %s! status_code: %s " % (fbase, r.status_code)
         tk.messagebox.showerror("Failed file upload", msg)
         #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
@@ -560,9 +678,12 @@ def make_post(fbase, realfile):
     return ret
     
     
-           
-def make_delete():
-    pass                                   
+def get_response_details(msg, text):
+    o = json.loads(text)['error']
+    msg += "%s: %s" % ("codice errore", o['code'])
+    msg += "%s: %s" % ("message", o['message'])
+    msg += "%s: %s" % ("errordetails", o['errordetails'])
+    return msg
 
 
 def test_file(file):
@@ -570,8 +691,8 @@ def test_file(file):
     result = regex.match(file)
     return True if result != None else False
     
-    
-def upload_files(here_file=None):
+ 
+def upload_remove_files(tipo="upload", here_file=None):
     error = False
     save = True
     #os.chdir(entry_dir)
@@ -631,16 +752,24 @@ def upload_files(here_file=None):
             logging.error(msg) 
             break
             
-        ret = make_post(fbase, abs_file)
-        r = ret["response"]
         
         
-        """
-        files_ = {'file': (file, open(filename, 'rb'), 'application/pdf', {'Expires': '0'})}
         dt_snd = get_timestamp()
-        r = requests.post(data['URL'], files=files_)
+
+        #if messagebox.askyesno('Yes|No', 'Vuoi effettuare un Invio o una Cancellazione? (Yes per invio)'):
+        if tipo == "upload": 
+            ret = make_post(fbase, abs_file)
+        else:    
+            ret = make_delete(fbase, abs_file)
+
         dt_rcv = get_timestamp()
-        """
+
+        r = ret["response"]
+        returned_result = ret["vret"]
+     
+        #files_ = {'file': (file, open(filename, 'rb'), 'application/pdf', {'Expires': '0'})}
+        #r = requests.post(data['URL'], files=files_)
+        
         
         file_response = os.path.join(response_dir, "%s%s" % (fbase, ".response"))
 
@@ -656,17 +785,18 @@ def upload_files(here_file=None):
         fh_resp.write(r.text)
         fh_resp.close()
     
-        id = record_upload(os.path.basename(filename.lower()), size, dt_snd, dt_rcv, r.status_code)
+        id = record_upload(os.path.basename(filename.lower()), size, dt_snd, dt_rcv, r.status_code, tipo)
             
-        if r.status_code not in CODES_OK:
+        if returned_result == False:
             print("ecco status code %s" %  r.status_code )
             msg = "Upload failed for File %s. status_code: %s!" % (file, r.status_code)
+            msg = get_response_details(msg, r.text)
             tk.messagebox.showerror("Failed file upload", msg)
             #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
             logging.error(msg) 
             r.raise_for_status()
         else:
-            msg = "Upload Successfull for File %s. status_code: %s!" % (file, r.status_code)
+            msg = "%s Successfull for File %s. status_code: %s!" % ("Upload" if tipo=="upload" else "Remove", file, r.status_code)
             tk.messagebox.showinfo("File upload successfull", msg)
             #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
             logging.error(msg) 
@@ -679,7 +809,7 @@ def upload_files(here_file=None):
                     logging.error(msg) 
                     tk.messagebox.showerror("Saving Error", msg)
             
-            if SAVE_FILE_DB:
+            if tipo == "upload" and INSERT_BASE64:
                 try:
                     file_load(id, abs_file)
                 except (e):
@@ -699,6 +829,10 @@ def update(rows):
     trv.delete(*trv.get_children())
     for i, row in enumerate(rows):
         tags=['unchecked'] if i%2 == 1 else ['unchecked','gray']
+        
+        #print("giorni...")
+        #if row[6] == None: row[6] = ""
+        
         print("inserted %d %s" % (i, str(tags)))
         trv.insert('', 'end', values=row, tags=tags)
     
@@ -815,23 +949,30 @@ def upload_again():
         
 
 def populate():
-    query="SELECT id, filename, size, dt_snd, dt_rcv, status FROM pdf2ws0f ORDER BY id DESC"
+    query="SELECT id, filename, size, dt_snd, dt_rcv, status, action FROM pdf2ws0f ORDER BY id DESC"
     cur.execute(query)
     rows=cur.fetchall()
     update(rows)
 
 
-def record_upload(filename, size, dt_snd, dt_rcv, status):
+def record_upload(filename, size, dt_snd, dt_rcv, status, action):
     if filename == "" or \
        size == "" or \
        dt_snd == "" or \
        dt_rcv == "" or \
-       status == "":
-       return 
+       status == "" or \
+       action == "":
+        msg="Field missing!" 
+        logging.error(msg)
+        messagebox.showerror("Insert Error", msg) 
+        conn.rollback()
+        logging.error("rollback occurred") 
+        return False
     
+
     #print(filename, dt_snd, dt_rcv, status)
     try:       
-        cur.execute('INSERT INTO pdf2ws0f (filename, size, dt_snd, dt_rcv, status) VALUES (?,?,?,?,?)', (filename, rs(size), dt_snd, dt_rcv, status))
+        cur.execute('INSERT INTO pdf2ws0f (filename, size, dt_snd, dt_rcv, status, action) VALUES (?,?,?,?,?,?)', (filename, rs(size), dt_snd, dt_rcv, status, action))
         rows=get_affected_rows()
         rowid = cur.lastrowid
         print(type(rows))

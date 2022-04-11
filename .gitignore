@@ -1,3 +1,5 @@
+.gitignore
+.git/
 Include/
 build/
 dist/
@@ -11,3 +13,7 @@ export/*xls
 export/*xlsx
 responses/*response
 tkpost.spec.old
+logs/
+Untitled.ipynb
+db/coronavirus.db
+logs/responses.log

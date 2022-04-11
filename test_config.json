@@ -6,7 +6,8 @@
   "CLIENT_ID": "sb-113bbb59-48dc-4f58-9a9e-66dbbb3cdbfb!b131464|it-rt-sap-cloud-foundry-dev-qua-fauoq769!b117912",
   "CLIENT_SECRET": "0e6b80e9-326a-48dc-8a5a-ddd611821fbf$BPHG8W0ZVJiT2OEV5Jw744TJNH3032ydUZOe8bs-r_Q=",
   "EXTENSIONS" : ["pdf"],
-  "CODES_OK" : ["OK","CREATED","ACCEPTED"],
+  "CODES_POST" : ["OK","CREATED","ACCEPTED"],
+  "CODES_DELETE" : ["OK","CREATED","ACCEPTED","NO_CONTENT"],
   "MULTI_FILES" : 1,
   "INNER_DIR" : "os.path.join('documents','sviluppo','python','postexe')",
   "RESPONSE_DIR" : "responses",
@@ -14,13 +15,13 @@
   "IMG_DIR" : "img",
   "EXPORT_DIR" : "export",
   "LOGS_DIR" : "logs",
+  "LOGS_FILE": "responses.log",
   "DATA_DIR" : "data",
-  "LOGS_DIR" : "logs",
   "DB_DIR" : "db",
-  "LOGS_DIR" : "logs",
   "CHECKED" : "checkedn.png",
   "UNCHECKED" : "uncheckedn.png",
-  
+  "INSERT_BASE64" : 1,
+  "LOG_BASE64" : 0,
   "DBNAME": "coronavirus.db" 
 }
 
