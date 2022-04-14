@@ -12,6 +12,8 @@
   "INNER_DIR" : "os.path.join('documents','sviluppo','python','postexe')",
   "RESPONSE_DIR" : "responses",
   "SAVE_DIR" : "save",
+  "SAVE_DIR_SAMBA" : "Z:\\DDT_EM",
+  "SAVE_FILE_DIR" : 0,  
   "IMG_DIR" : "img",
   "EXPORT_DIR" : "export",
   "LOGS_DIR" : "logs",
@@ -21,7 +23,9 @@
   "UNCHECKED" : "uncheckedn.png",
   "INSERT_BASE64" : 0,
   "LOG_BASE64" : 0,
-  "DBNAME": "coronavirus.db" 
+  "DBNAME": "coronavirus.db", 
+  "SAVE_RETENTION" : 2,
+  "RESPONSE_RETENTION" : 4  
 }
 
     

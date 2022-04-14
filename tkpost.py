@@ -42,7 +42,9 @@ entry_dir, response_dir, save_dir, export_dir = (None,)*4
 logs_dir, db_dir, img_dir, data_dir, logs_file = (None,)*5
 
 #save base64 file in pdf2file0f and log base64 to responses.log
-INSERT_BASE64, LOG_BASE64 = None, None
+INSERT_BASE64, LOG_BASE64, SAVE_FILE, SAVE_RESPONSE = None, None, None, None
+
+SAVE_RETENTION, RESPONSE_RETENTION = None, None
 
 CODES_POST = None
 CODES_DELETE = None
@@ -50,11 +52,11 @@ CODES_DELETE = None
 global data
 
 im_checked, im_unchecked, trv = (None,)*3
-checkall_btn, uncheckall_btn, upload_again_btn, excel_btn = (None,)*4
+checkall_btn, uncheckall_btn, upload_again_btn, remove_again_btn, excel_btn = (None,)*5
 allowedFileTypes=(('pdf files', '*.pdf'),)
 
 
-SAVE_FILE_DIR = True   
+
 W_WIDTH = 850
 W_HEIGHT = 600
 
@@ -62,6 +64,49 @@ root = Tk()
 root.title("PDF 2 WS")
 root.geometry("%dx%d" % (W_WIDTH, W_HEIGHT))
    
+
+
+def rm_file(file):
+    if file == None:
+        return
+    
+    try:
+        os.remove(file)
+    except OSError as e:
+        print("error removing file {} {}".format(file, str(e)))
+        logging.info("error removing file {}".format(file))
+    else:
+        if os.path.exists(file):
+            print("something went wrong deleting {}".format(file))
+            logging.info("something went wrong deleting {}".format(file))
+        else:
+            logging.info("logfile deleted {}".format(file))
+
+
+
+
+def clean_logs(search_dir, ext="log", hold=30):
+    print(search_dir)
+    #search_dir = '.' if search_dir == None else search_dir
+    #os.chdir(search_dir)
+
+    #files = filter(os.path.isfile, os.listdir(search_dir))
+    files = [os.path.join(search_dir,f) for f in os.listdir(search_dir) ]
+    #files = [ (time.ctime(os.path.getmtime(f)), os.path.join(search_dir, f)) for f in files if f.lower().endswith('.py')]
+    files = [ (dt.utcfromtimestamp(os.path.getmtime(f)), f) 
+                for f in files 
+                   if f.lower().endswith(ext)
+            ]
+
+    files.sort(key=lambda x: x[0], reverse=True)
+    ll=list(files)
+
+    print(ll)
+
+    lll=list(filter(rm_file, (x[1] for x in files[hold:])))
+    print(lll)
+
+
 
 def load_config(file_config):
     global data
@@ -75,8 +120,8 @@ def setup_profile():
     global CODES_DELETE
     global im_checked, im_unchecked
     global response_dir, save_dir, export_dir
-    global logs_dir, db_dir, img_dir, data_dir, logs_file, INSERT_BASE64, LOG_BASE64
-    
+    global logs_dir, db_dir, img_dir, data_dir, logs_file, INSERT_BASE64, LOG_BASE64, SAVE_FILE, SAVE_RESPONSE
+    global SAVE_RETENTION, RESPONSE_RETENTION
     
     #ff, modified at 20220328
     #load_config("test_config.json")
@@ -86,6 +131,11 @@ def setup_profile():
     LOG_BASE64 = data["LOG_BASE64"]
     DATA_DIR = data['DATA_DIR']  
     logs_file = data['LOGS_FILE']  
+    SAVE_FILE = data["SAVE_FILE"]
+    SAVE_RESPONSE = data["SAVE_RESPONSE"]
+    SAVE_RETENTION = data["SAVE_RETENTION"] or 30
+    RESPONSE_RETENTION = data["RESPONSE_RETENTION"] or 30
+
     CODES_POST = [ v for k,v in requests.codes.__dict__.items() if k in data['CODES_POST']]
     CODES_DELETE = [ v for k,v in requests.codes.__dict__.items() if k in data['CODES_DELETE']]
     #MULTI_FILES = True
@@ -130,7 +180,13 @@ def setup_profile():
         save_dir = os.path.join(".", data['SAVE_DIR'])
         print(save_dir)
         if os.path.isdir(save_dir) == False:
-            os.mkdir(save_dir, 755);
+            #os.mkdir(save_dir, 755);
+            save_dir = data['SAVE_DIR_SAMBA']
+            if os.path.isdir(save_dir) == False:
+                msg = "Error creating save dir (%s)" % save_dir
+                tk.messagebox.showerror("Setup Error", msg) 
+        print(save_dir)
+
         
         export_dir = os.path.join(".", data['EXPORT_DIR'])
         print(export_dir)
@@ -151,10 +207,27 @@ def setup_profile():
         if os.path.isdir(logs_dir) == False:
             os.mkdir(logs_dir, 755);
             
+        #20220414: ffaccia, absolute path to let installation be possible on samba
+        #on the same database
         db_dir = os.path.join(".", data['DB_DIR'])
         print(db_dir)
-        if os.path.isdir(db_dir) == False:
-            os.mkdir(db_dir, 755);
+        if os.path.isdir(db_dir) == True:
+            pass
+            #os.mkdir(db_dir, 755);
+        else:
+            db_dir = data['DB_DIR_SAMBA']
+            dbFile_ = os.path.join(db_dir, data['DBNAME'])
+            #with open(os.path.join(".","francesco.txt"),"w") as ff:
+            #    ff.write(str(dbFile_))
+
+            print("connecting to %s" % dbFile_)
+
+            if os.path.isdir(db_dir) == False:
+                print("making dir %s" % db_dir)
+                #os.mkdir(db_dir, 755);
+                msg = "Error creating db dir (%s)" % dbFile_
+                tk.messagebox.showerror("Setup Error", msg)
+
 
         funchecked = os.path.join(entry_dir, 'img', data['UNCHECKED'])
         fchecked = os.path.join(entry_dir, 'img', data['CHECKED'])
@@ -170,12 +243,18 @@ def setup_profile():
     logName = os.path.join(logs_dir, logs_file)
     logging.basicConfig(filename=logName, level=logging.DEBUG, format=FORMAT)
 
-
+    logging.info("START PROGRAM")
+    logging.info("logs_dir: %s " % logs_dir)
+    logging.info("save_dir: %s " % save_dir)
+    logging.info("db_dir: %s " % db_dir)
+    logging.info("export_dir: %s " % export_dir)
+    logging.info("img_dir: %s " % img_dir)
 
 
 def setup_connection():
     global dbFile, conn, cur, db_dir
     dbFile = os.path.join(db_dir, data['DBNAME'])
+    print("connecting to %s" % dbFile)
     conn = sqlite3.connect(dbFile)
     cur = conn.cursor()
     
@@ -300,7 +379,7 @@ def clear():
 
 
 def setup_frames():    
-    global trv, checkall_btn, uncheckall_btn, upload_again_btn, excel_btn
+    global trv, checkall_btn, uncheckall_btn, upload_again_btn, remove_again_btn, excel_btn
 
     wrapper1 = LabelFrame(root, text="Last Sent Pdf")
     wrapper2 = LabelFrame(root,  text="Upload/Remove Pdf")
@@ -382,6 +461,9 @@ def setup_frames():
 
     upload_again_btn = Button(wrapper1, text="Upload again", command=upload_again)
     upload_again_btn.pack(side=LEFT, anchor="s", padx=10)
+
+    remove_again_btn = Button(wrapper1, text="Remove again", command=remove_again)
+    remove_again_btn.pack(side=LEFT, anchor="s", padx=10)
 
     excel_btn = Button(wrapper1, text="Export", command=write_workBook)
     excel_btn.pack(side=LEFT, anchor="s", padx=10)
@@ -516,10 +598,10 @@ def make_post(fbase, realfile):
     payload["nomefile"] = os.path.basename(realfile)
     payload["tipo"] = "DDT"
     
-    with open(r"C:\Users\f.faccia\Downloads\ff0187092455.json", 'w') as outfile:
-        outfile.write(json.dumps(payload))
+    #with open(r"C:\Users\f.faccia\Downloads\ff0187092455.json", 'w') as outfile:
+    #    outfile.write(json.dumps(payload))
 
-    print(type(payload))
+    #print(type(payload))
 
     if LOG_BASE64:
         logging.info("%s " % payload)
@@ -734,8 +816,9 @@ def upload_remove_files(tipo="upload", here_file=None):
         file = os.path.basename(filename).lower()
         ext = ''.join(file.split(".")[-1])
         fbase = ''.join(file.split(".")[:-1])
+        logging.info("file: %s, operazione: %s" % (abs_file, tipo)) 
         
-        
+
         if not test_file(file):
             msg = "File %s cannot be chosen because expected files are like this: '0187123456.pdf'!" % file
             tk.messagebox.showerror("File Input Error", msg)
@@ -746,7 +829,7 @@ def upload_remove_files(tipo="upload", here_file=None):
 
         print(fbase, ext)
         if ext not in data['EXTENSIONS']:
-            msg = "File %s cannot be sent due to wrong extension: %s!" % (file, ext)
+            msg = "File %s cannot be chosen due to wrong extension: %s!" % (file, ext)
             tk.messagebox.showerror("File Input Error", msg)
             #win32api.MessageBox(0, msg, "Critical Error", 0x00001000)         
             logging.error(msg) 
@@ -771,48 +854,57 @@ def upload_remove_files(tipo="upload", here_file=None):
         #r = requests.post(data['URL'], files=files_)
         
         
-        file_response = os.path.join(response_dir, "%s%s" % (fbase, ".response"))
 
         file_save = os.path.join(save_dir, file)
-        print("---")
+        print("---####")
         print(file_save)
         
         
-        fh_resp = open(file_response,"w")
-        
-        fh_resp.write("status code: %s" % str(r.status_code))
-        fh_resp.write(str(r.headers))
-        fh_resp.write(r.text)
-        fh_resp.close()
+        if SAVE_RESPONSE and response_dir:
+            file_response = os.path.join(response_dir, "%s%s" % (fbase, ".response"))
+            fh_resp = open(file_response,"w")
+            fh_resp.write("status code: %s" % str(r.status_code))
+            fh_resp.write(str(r.headers))
+            fh_resp.write(r.text)
+            fh_resp.close()
     
         id = record_upload(os.path.basename(filename.lower()), size, dt_snd, dt_rcv, r.status_code, tipo)
             
         if returned_result == False:
             print("ecco status code %s" %  r.status_code )
-            msg = "Upload failed for File %s. status_code: %s!" % (file, r.status_code)
+            msg = "%s failed for File %s. status_code: %s!" % (tipo, file, r.status_code)
             msg = get_response_details(msg, r.text)
-            tk.messagebox.showerror("Failed file upload", msg)
+            tk.messagebox.showerror("%s Failed" % tipo, msg)
             #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
             logging.error(msg) 
-            r.raise_for_status()
+            #r.raise_for_status()
         else:
-            msg = "%s Successfull for File %s. status_code: %s!" % ("Upload" if tipo=="upload" else "Remove", file, r.status_code)
-            tk.messagebox.showinfo("File upload successfull", msg)
+            msg = "%s Successfull for File %s. status_code: %s!" % (tipo, file, r.status_code)
+            #tk.messagebox.showinfo(msg)
+            tk.messagebox.showinfo("%s Successfull" % tipo, msg)
             #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
             logging.error(msg) 
             
-            if SAVE_FILE_DIR and save:
+
+            if SAVE_FILE:
                 try:
-                    sh_copy(abs_file, file_save)
-                except:
-                    msg = "Error saving file %s!" % os.path.basename(file)
+                    #if they use the shortcut that pick from save_dir there's no need to save it again
+                    print("wwww")
+                    print(os.path.dirname(abs_file))
+                    print(os.path.dirname(file_save))
+                    if os.path.dirname(os.path.abspath(abs_file)) == os.path.dirname(os.path.abspath(file_save)):
+                        pass
+                    else:
+                        sh_copy(abs_file, file_save)
+                except Exception as e:
+                    msg = "Error saving file %s\n%s\n%s\nerror: %s!" % (os.path.basename(file), abs_file, file_save, str(e))
                     logging.error(msg) 
                     tk.messagebox.showerror("Saving Error", msg)
             
             if tipo == "upload" and INSERT_BASE64:
                 try:
                     file_load(id, abs_file)
-                except (e):
+                except Exception as e:
                     msg = "Error saving file %s into db. Error %s!" % (os.path.basename(file), str(e))
                     logging.error(msg) 
                     tk.messagebox.showerror("Saving Error", msg)
@@ -876,18 +968,22 @@ def toggleDisableButton():
             checkall_btn['state'] = "disabled"
             uncheckall_btn['state'] = "active"
             upload_again_btn['state'] = "active"
+            remove_again_btn['state'] = "active"
         elif countChecked() == 0:    
             uncheckall_btn['state'] = "disabled"
             checkall_btn['state'] = "active"
             upload_again_btn['state'] = "disabled"
+            remove_again_btn['state'] = "disabled"
         elif countChecked():     
             uncheckall_btn['state'] = "active"
             checkall_btn['state'] = "active"
             upload_again_btn['state'] = "active"
+            remove_again_btn['state'] = "active"
     else:
         checkall_btn['state'] = "disabled"
         uncheckall_btn['state'] = "disabled"
         upload_again_btn['state'] = "disabled"
+        remove_again_btn['state'] = "disabled"
         excel_btn['state'] = "disabled"
             
             
@@ -938,6 +1034,32 @@ def upload_again():
     trv_list = [ trv.item(row) for row in trv.get_children() ]
     for item in trv_list:
         #item = trv_list(row)
+        #print("qwe---")
+        #print(item)
+        #print(item["tags"])
+        #print(item)
+        #print(item['values'][0])
+        #print(item['values'][1])    
+        if item["tags"][0] == "checked":
+            upload_remove_files("upload", item['values'][1])
+        
+
+def remove_again():
+    """
+    #for row in trv.get_children():
+    #for row in trv_list:
+        item = trv.item(row)
+        print("qwe---")
+        print(item["tags"])
+        print(item)
+        print(item['values'][0])
+        print(item['values'][1])    
+        if item["tags"][0] == "checked":
+            upload_files(item['values'][1])
+    """
+    trv_list = [ trv.item(row) for row in trv.get_children() ]
+    for item in trv_list:
+        #item = trv_list(row)
         print("qwe---")
         print(item)
         print(item["tags"])
@@ -945,7 +1067,7 @@ def upload_again():
         print(item['values'][0])
         print(item['values'][1])    
         if item["tags"][0] == "checked":
-            upload_files(item['values'][1])
+            upload_remove_files("remove", item['values'][1])
         
 
 def populate():
@@ -1127,7 +1249,7 @@ def delete_id(qid):
 def write_workBook():
     bstart=True
     
-    column_width=(None, 5, 45, 8, 25, 25, 8)
+    column_width=(None, 5, 45, 8, 25, 25, 8, 10)
     
     font_header = Font(name='Calibri',
                  size=13,
@@ -1161,17 +1283,18 @@ def write_workBook():
                 wcell_body.fill = fillColorStriped
                  
         bstart=False
-    
-
+ 
 
     if not bstart: 
         try:
-            exp_file = os.path.join(export_dir, 'file_sent_%s.xlsx' % dt.strftime(dt.now(),'%Y%m%d'))
+            exp_file = os.path.join(export_dir, 'OF_ddt_sent_%s.xlsx' % dt.strftime(dt.now(),'%Y%m%d'))
             wb.save(filename=exp_file)
+            os.system(exp_file)
         except IOError as e:
             messagebox.showerror("Write File Error", "Unable to write file %s! Check permission or if it is already open! %s" % (os.path.basename(exp_file), str(e)))     
         else:
             messagebox.showinfo("Write File Info", "Created file %s!" % os.path.basename(exp_file))     
+
 
 
 
@@ -1196,6 +1319,13 @@ if __name__ == "__main__":
  
     setup_frames()
     root.mainloop()
+
+    print("####")
+    print(save_dir)
+    print(response_dir)
+    clean_logs(os.path.abspath(save_dir), "pdf", SAVE_RETENTION)
+    clean_logs(os.path.abspath(response_dir), "response", RESPONSE_RETENTION)
+
 
 
 
