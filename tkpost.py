@@ -569,6 +569,7 @@ def get_headers_post(tok):
 
     headers['Accept'] = 'application/json' 
     headers['Content-Type'] = 'application/json' 
+    headers['Connection'] = 'keep-alive' 
 
     return headers
     
@@ -605,9 +606,11 @@ def make_post(fbase, realfile):
 
     if LOG_BASE64:
         logging.info("%s " % payload)
+
+    logging.info("get token from %s" % data['URL_POST_CEVA_TEST']) 
     
     headers=get_headers_fetch()
-    r = requests.get(data['URL_POST_CEVA_TEST'], headers=headers)
+    r = requests.get(data['URL_POST_CEVA_TEST'], headers=headers, timeout=(60, 60))
     #r = requests.get(data['URL'], headers=headers)
 
     #print(r.request.headers)
@@ -626,6 +629,7 @@ def make_post(fbase, realfile):
         return ret
     
     jsessionid = r.cookies['JSESSIONID']
+    jvcapid = r.cookies['__VCAP_ID__']
     token = r.headers.get("X-CSRF-token", None)
     if token == None:        
         msg = "Error retrieving TOKEN from Sap! "
@@ -644,13 +648,14 @@ def make_post(fbase, realfile):
 
     jar = requests.cookies.RequestsCookieJar()
     jar.set('JSESSIONID', jsessionid, path='/http')
+    jar.set('__VCAP_ID__', jvcapid, path='/http')
     #jar.set('__VCAP_ID__', vcapid, path='/http')
 
     #r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=headers, data=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
-    r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=get_headers_post(token), data=json.dumps(payload))
+    r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=get_headers_post(token), data=json.dumps(payload), timeout=(60, 60))
     ret["response"] = r
 
     print(r.request.headers)
@@ -691,10 +696,11 @@ def make_delete(fbase, realfile):
     
     print(type(payload))
 
+    logging.info("get token from %s" % data['URL_DEL_CEVA_TEST']) 
     logging.info("%s " % payload)
     
     headers=get_headers_fetch()
-    r = requests.get(data['URL_DEL_CEVA_TEST'], headers=headers)
+    r = requests.get(data['URL_DEL_CEVA_TEST'], headers=headers, timeout=(60, 60))
     #r = requests.get(data['URL'], headers=headers)
 
     #print(r.request.headers)
@@ -737,7 +743,7 @@ def make_delete(fbase, realfile):
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
-    r = requests.delete(data['URL_DEL_CEVA_TEST'], cookies=jar, headers=get_headers_post(token), data=json.dumps(payload))
+    r = requests.delete(data['URL_DEL_CEVA_TEST'], cookies=jar, headers=get_headers_post(token), data=json.dumps(payload), timeout=(60, 60))
     ret["response"] = r
 
     print(r.request.headers)
@@ -873,6 +879,8 @@ def upload_remove_files(tipo="upload", here_file=None):
         if returned_result == False:
             print("ecco status code %s" %  r.status_code )
             msg = "%s failed for File %s. status_code: %s!" % (tipo, file, r.status_code)
+            print(":::::")
+            print(r.text)
             msg = get_response_details(msg, r.text)
             tk.messagebox.showerror("%s Failed" % tipo, msg)
             #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 

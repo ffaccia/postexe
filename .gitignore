@@ -3,6 +3,9 @@
 Include/
 build/
 dist/
+dist_old/
+nsis/
+nsis_old/
 Lib/
 test/
 pyvenv.cfg

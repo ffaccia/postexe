@@ -1,0 +1,46 @@
+{
+  "URL": "https://webhook.site/0a144bdb-da97-4808-99b8-e4f8a5e03a7a",
+  "URL_PROD": "https://httpbin.org/post",
+  "URL_POST_CEVA_TEST": "https://sap-cloud-foundry-dev-qua-fauoq769.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/InsertAttachment",
+  "URL_DEL_CEVA_TEST": "https://sap-cloud-foundry-dev-qua-fauoq769.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/DeleteAttachment",
+  "CLIENT_ID": "sb-113bbb59-48dc-4f58-9a9e-66dbbb3cdbfb!b131464|it-rt-sap-cloud-foundry-dev-qua-fauoq769!b117912",
+  "CLIENT_SECRET": "0e6b80e9-326a-48dc-8a5a-ddd611821fbf$BPHG8W0ZVJiT2OEV5Jw744TJNH3032ydUZOe8bs-r_Q=",
+
+  "EXTENSIONS" : ["pdf"],
+
+  "CODES_POST" : ["OK","CREATED","ACCEPTED"],
+  "CODES_DELETE" : ["OK","CREATED","ACCEPTED","NO_CONTENT"],
+
+  "MULTI_FILES" : 1,
+
+  "INNER_DIR" : "os.path.join('documents','sviluppo','python','postexe')",
+
+  "RESPONSE_DIR" : "responses",
+  "SAVE_RESPONSE" : 1,
+  "RESPONSE_RETENTION" : 3,  
+  
+  "SAVE_DIR" : "save",
+  "SAVE_DIR_SAMBA" : "Z:\\DDT_EM",
+  "SAVE_FILE" : 1,
+  "SAVE_RETENTION" : 2,
+  
+  "IMG_DIR" : "img",
+  "EXPORT_DIR" : "export",
+
+  "LOGS_DIR" : "logs",
+  "LOGS_FILE": "responses.log",
+
+  "DATA_DIR" : "data",
+  "CHECKED" : "checkedn.png",
+  "UNCHECKED" : "uncheckedn.png",
+
+  "DB_DIR" : "db",
+  "DB_DIR_SAMBA": "X:\\EN\\UPLOAD_PDF\\tkpost\\db",
+  "DBNAME": "pdf2ws.db",
+
+  "INSERT_BASE64" : 0,
+  "LOG_BASE64" : 0
+
+}
+
+    
