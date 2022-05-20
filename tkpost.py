@@ -16,9 +16,11 @@ from dotenv import load_dotenv
 import sqlite3
 import logging
 
+
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
 import tkinter as tk
+from tkinter.messagebox import _show
 from tkcalendar import DateEntry
 
 from openpyxl import Workbook
@@ -57,7 +59,7 @@ allowedFileTypes=(('pdf files', '*.pdf'),)
 
 
 
-W_WIDTH = 850
+W_WIDTH = 900
 W_HEIGHT = 600
 
 root = Tk()
@@ -341,7 +343,6 @@ def search_files(qfile, qdatada, qdataa, qstatus, qaction):
         try:
             qstatus = int(qstatus)
         except ValueError:
-            print("valueerror")
             qstatus=0
 
         
@@ -437,16 +438,16 @@ def setup_frames():
     trv.column("#3", minwidth=50, width=60, stretch=0, anchor=CENTER)
     trv.heading('#3', text="Size")
 
-    trv.column("#4", minwidth=150, width=150, stretch=1)
+    trv.column("#4", minwidth=150, width=160, stretch=1)
     trv.heading('#4', text="dt_snd")
 
-    trv.column("#5", minwidth=150, width=150, stretch=1)
+    trv.column("#5", minwidth=150, width=160, stretch=1)
     trv.heading('#5', text="dt_rcv")
 
-    trv.column("#6", minwidth=40, width=40, stretch=1)
+    trv.column("#6", minwidth=40, width=70, stretch=1)
     trv.heading('#6', text="status")
 
-    trv.column("#7", minwidth=50, width=50, stretch=1)
+    trv.column("#7", minwidth=50, width=80, stretch=1)
     trv.heading('#7', text="action")
 
        
@@ -573,12 +574,13 @@ def get_headers_post(tok):
 
     return headers
     
-    
+
 def make_post(fbase, realfile):
     ret = {}
     ret["response"] = ""
     ret["vret"] = False
     
+    #global root
     
     template_bod = '''
         {
@@ -609,6 +611,9 @@ def make_post(fbase, realfile):
 
     logging.info("get token from %s" % data['URL_POST_CEVA_TEST']) 
     
+    root.config(cursor="watch")
+    root.update()
+    
     headers=get_headers_fetch()
     r = requests.get(data['URL_POST_CEVA_TEST'], headers=headers, timeout=(60, 60))
     #r = requests.get(data['URL'], headers=headers)
@@ -629,7 +634,14 @@ def make_post(fbase, realfile):
         return ret
     
     jsessionid = r.cookies['JSESSIONID']
-    jvcapid = r.cookies['__VCAP_ID__']
+    vcapid = r.cookies['__VCAP_ID__']
+    if jsessionid == None or vcapid == None:        
+        msg = "Error retrieving jsessionid/vcapid cookies from Sap! jsessionid:%s, vcapid:%s" % (jsessionid, vcapid)
+        tk.messagebox.showerror("Failed file upload", msg)
+        #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
+        logging.error(msg) 
+        return ret
+
     token = r.headers.get("X-CSRF-token", None)
     if token == None:        
         msg = "Error retrieving TOKEN from Sap! "
@@ -648,16 +660,24 @@ def make_post(fbase, realfile):
 
     jar = requests.cookies.RequestsCookieJar()
     jar.set('JSESSIONID', jsessionid, path='/http')
-    jar.set('__VCAP_ID__', jvcapid, path='/http')
-    #jar.set('__VCAP_ID__', vcapid, path='/http')
+    jar.set('__VCAP_ID__', vcapid, path='/http')
+    
 
     #r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=headers, data=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
     r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=get_headers_post(token), data=json.dumps(payload), timeout=(60, 60))
+
+    # Destroying root window after 6.7 seconds
+    #rootw.after(5000, rootw.destroy)
+
     ret["response"] = r
 
+
+    root.config(cursor='')
+    root.update()
+    
     print(r.request.headers)
     print("------------------------------------------------")
     print(r.headers)
@@ -700,6 +720,12 @@ def make_delete(fbase, realfile):
     logging.info("%s " % payload)
     
     headers=get_headers_fetch()
+
+
+
+    root.config(cursor='watch')
+    root.update()
+
     r = requests.get(data['URL_DEL_CEVA_TEST'], headers=headers, timeout=(60, 60))
     #r = requests.get(data['URL'], headers=headers)
 
@@ -709,7 +735,7 @@ def make_delete(fbase, realfile):
     
     #print(r.cookies['JSESSIONID'])
 
-    #vcapid = r.cookies['__VCAP_ID__']
+
 
     if r.status_code not in CODES_DELETE:       
         msg = "Error get call for retrieving Token! status_code != 200: %s!" % r.status_code
@@ -718,8 +744,18 @@ def make_delete(fbase, realfile):
         logging.error(msg) 
         return ret
     
+    
+
     jsessionid = r.cookies['JSESSIONID']
-    jvcapid = r.cookies['__VCAP_ID__']
+    vcapid = r.cookies['__VCAP_ID__']
+    if jsessionid == None or vcapid == None:        
+        msg = "Error retrieving jsessionid/vcapid cookies from Sap! jsessionid:%s, vcapid:%s" % (jsessionid, vcapid)
+        tk.messagebox.showerror("Failed file upload", msg)
+        #win32api.MessageBox(0, msg, "Critical Error", 0x00001000) 
+        logging.error(msg) 
+        return ret
+
+
     token = r.headers.get("X-CSRF-token", None)
     if token == None:        
         msg = "Error retrieving TOKEN from Sap! "
@@ -728,6 +764,7 @@ def make_delete(fbase, realfile):
         logging.error(msg) 
         return ret
     
+
     logging.error("token: %s" % token) 
     #cookies = dict(JSESSIONID=jsessionid)
 
@@ -738,8 +775,7 @@ def make_delete(fbase, realfile):
 
     jar = requests.cookies.RequestsCookieJar()
     jar.set('JSESSIONID', jsessionid, path='/http')
-    jar.set('__VCAP_ID__', jvcapid, path='/http')
-    #jar.set('__VCAP_ID__', vcapid, path='/http')
+    jar.set('__VCAP_ID__', vcapid, path='/http')
 
     #r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=headers, data=payload)
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
@@ -747,6 +783,9 @@ def make_delete(fbase, realfile):
     #r = requests.post(data['URL_POST_CEVA_TEST'], headers=headers, json=payload)
     r = requests.delete(data['URL_DEL_CEVA_TEST'], cookies=jar, headers=get_headers_post(token), data=json.dumps(payload), timeout=(60, 60))
     ret["response"] = r
+
+    root.config(cursor='')
+    root.update()
 
     print(r.request.headers)
     print("------------------------------------------------")
@@ -756,6 +795,7 @@ def make_delete(fbase, realfile):
     print("------------------------------------------------")
     print(r.content)
     
+
     if r.status_code not in CODES_DELETE:       
         msg = "Error post call for sending file %s! status_code: %s " % (fbase, r.status_code)
         tk.messagebox.showerror("Failed file upload", msg)
@@ -899,9 +939,9 @@ def upload_remove_files(tipo="upload", here_file=None):
             if SAVE_FILE:
                 try:
                     #if they use the shortcut that pick from save_dir there's no need to save it again
-                    print("wwww")
-                    print(os.path.dirname(abs_file))
-                    print(os.path.dirname(file_save))
+                    #print("wwww")
+                    #print(os.path.dirname(abs_file))
+                    #print(os.path.dirname(file_save))
                     if os.path.dirname(os.path.abspath(abs_file)) == os.path.dirname(os.path.abspath(file_save)):
                         pass
                     else:
@@ -935,7 +975,7 @@ def update(rows):
         #print("giorni...")
         #if row[6] == None: row[6] = ""
         
-        print("inserted %d %s" % (i, str(tags)))
+        #print("inserted %d %s" % (i, str(tags)))
         trv.insert('', 'end', values=row, tags=tags)
     
     toggleDisableButton()
@@ -955,21 +995,21 @@ def countChecked(opt="checked"):
         if trv.item(rowid, "tags")[0] == opt:
             cnt +=1
             
-    print("checked: ",cnt)
+    #print("checked: ",cnt)
     return cnt
 
 
 def getCheckedIds(opt="checked"):
     cnt=0
     for rowid in list(reversed(trv.get_children())):
-        print("getcheckedids")
-        print(type(trv.item(rowid, "values")))
+        #print("getcheckedids")
+        #print(type(trv.item(rowid, "values")))
         if trv.item(rowid, "tags")[0] == opt:
             yield trv.item(rowid)
     
     
 def toggleDisableButton():
-    print(trv.get_children())
+    #print(trv.get_children())
     tot = len(list(trv.get_children()))
     print("tot %s" % tot)
     if tot:
@@ -1070,12 +1110,12 @@ def remove_again():
     trv_list = [ trv.item(row) for row in trv.get_children() ]
     for item in trv_list:
         #item = trv_list(row)
-        print("qwe---")
-        print(item)
-        print(item["tags"])
-        print(item)
-        print(item['values'][0])
-        print(item['values'][1])    
+        #print("qwe---")
+        #print(item)
+        #print(item["tags"])
+        #print(item)
+        #print(item['values'][0])
+        #print(item['values'][1])    
         if item["tags"][0] == "checked":
             upload_remove_files("remove", item['values'][1])
         
@@ -1107,8 +1147,8 @@ def record_upload(filename, size, dt_snd, dt_rcv, status, action):
         cur.execute('INSERT INTO pdf2ws0f (filename, size, dt_snd, dt_rcv, status, action) VALUES (?,?,?,?,?,?)', (filename, rs(size), dt_snd, dt_rcv, status, action))
         rows=get_affected_rows()
         rowid = cur.lastrowid
-        print(type(rows))
-        print(rows)
+        #print(type(rows))
+        #print(rows)
         if rows != 1:   
             msg="Inserted rows: %d" % rows
             logging.error(msg) 
@@ -1129,8 +1169,8 @@ def record_upload(filename, size, dt_snd, dt_rcv, status, action):
 def file_load(id, file):
     
     error = False
-    print("foreing")
-    print(id, file)
+    #print("foreing")
+    #print(id, file)
     basename = os.path.basename(file)
     text_data = base64.b64encode(open(file,"rb").read())
     size = len(text_data)
@@ -1211,7 +1251,7 @@ def delete_id(qid):
 
     try:
         for id in ids:
-            print("to delete ", id)
+            #print("to delete ", id)
             
             query=""" SELECT id FROM pdf2ws0f WHERE id = ? """ 
             cur.execute(query, (id,))
@@ -1308,6 +1348,15 @@ def write_workBook():
 
 
 
+def wait(message):
+    win = Toplevel(root)
+    win.transient()
+    win.title('Wait')
+    Label(win, text=message).pack()
+    return win
+
+
+
 if __name__ == "__main__":
 
     try:
@@ -1330,15 +1379,24 @@ if __name__ == "__main__":
     setup_frames()
     root.mainloop()
 
-    print("####")
-    print(save_dir)
-    print(response_dir)
+    #print("####")
+    #print(save_dir)
+    #print(response_dir)
     clean_logs(os.path.abspath(save_dir), "pdf", SAVE_RETENTION)
     clean_logs(os.path.abspath(response_dir), "response", RESPONSE_RETENTION)
 
 
 
 
+"""
 
+def wait_a_sec():
+    win = wait('Just one second...')
+    root.after(1000, win.destroy)
 
+root = Tk()
+button = Button(root, text='do something', command=wait_a_sec)
+root.mainloop()    
+
+"""
 
