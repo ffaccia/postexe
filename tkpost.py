@@ -719,6 +719,7 @@ def make_delete(fbase, realfile):
         return ret
     
     jsessionid = r.cookies['JSESSIONID']
+    jvcapid = r.cookies['__VCAP_ID__']
     token = r.headers.get("X-CSRF-token", None)
     if token == None:        
         msg = "Error retrieving TOKEN from Sap! "
@@ -737,6 +738,7 @@ def make_delete(fbase, realfile):
 
     jar = requests.cookies.RequestsCookieJar()
     jar.set('JSESSIONID', jsessionid, path='/http')
+    jar.set('__VCAP_ID__', jvcapid, path='/http')
     #jar.set('__VCAP_ID__', vcapid, path='/http')
 
     #r = requests.post(data['URL_POST_CEVA_TEST'], cookies=jar, headers=headers, data=payload)

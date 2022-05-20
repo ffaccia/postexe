@@ -509,3 +509,128 @@ error: 'C:\\Users\\f.faccia\\Documenti\\sviluppo\\python\\postexe\\save\\0800000
 [ 2022-05-19 15:16:04,684, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
 [ 2022-05-19 15:16:04,842, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "DELETE /http/CEVA/DeleteAttachment HTTP/1.1" 403 431
 [ 2022-05-19 15:16:06,478, ERROR] Error post call for sending file 0187098066! status_code: 403 
+[ 2022-05-19 17:50:49,382, INFO] START PROGRAM
+[ 2022-05-19 17:50:49,382, INFO] logs_dir: .\logs 
+[ 2022-05-19 17:50:49,382, INFO] save_dir: .\save 
+[ 2022-05-19 17:50:49,382, INFO] db_dir: .\db 
+[ 2022-05-19 17:50:49,382, INFO] export_dir: .\export 
+[ 2022-05-19 17:50:49,382, INFO] img_dir: .\img 
+[ 2022-05-19 17:50:58,453, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: upload
+[ 2022-05-19 17:50:58,456, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/InsertAttachment
+[ 2022-05-19 17:50:58,472, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:50:58,705, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/InsertAttachment HTTP/1.1" 200 0
+[ 2022-05-19 17:50:58,707, ERROR] token: ern8nbBTttl8Znckme1d17kk2yltQIn_
+[ 2022-05-19 17:50:58,707, ERROR] {'X-CSRF-token': 'ern8nbBTttl8Znckme1d17kk2yltQIn_', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 17:50:58,709, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:51:00,612, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "POST /http/CEVA/InsertAttachment HTTP/1.1" 400 None
+[ 2022-05-19 17:51:02,919, ERROR] Error post call for sending file 0187092454! status_code: 400 
+[ 2022-05-19 17:51:03,882, ERROR] upload failed for File 0187092454.pdf. status_code: 400!codice errore: ZCEVA_ATTACH/003message: Allegato già acquisitoerrordetails: {'errordetail': {'code': 'ZCEVA_ATTACH/003', 'message': 'Allegato già acquisito'}}
+[ 2022-05-19 17:51:10,012, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: remove
+[ 2022-05-19 17:51:10,014, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/DeleteAttachment
+[ 2022-05-19 17:51:10,014, INFO] {'vbeln': '0187092454', 'nomefile': '0187092454.pdf', 'tipo': 'DDT'} 
+[ 2022-05-19 17:51:10,015, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:51:10,153, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/DeleteAttachment HTTP/1.1" 200 0
+[ 2022-05-19 17:51:10,155, ERROR] token: y2NHKKteO4wSDVaTNGFqPVgFsh-LrWgn
+[ 2022-05-19 17:51:10,155, ERROR] {'X-CSRF-token': 'y2NHKKteO4wSDVaTNGFqPVgFsh-LrWgn', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 17:51:10,157, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:51:10,340, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "DELETE /http/CEVA/DeleteAttachment HTTP/1.1" 403 431
+[ 2022-05-19 17:51:11,909, ERROR] Error post call for sending file 0187092454! status_code: 403 
+[ 2022-05-19 17:53:31,765, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: upload
+[ 2022-05-19 17:53:31,768, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/InsertAttachment
+[ 2022-05-19 17:53:31,770, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:53:31,934, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/InsertAttachment HTTP/1.1" 200 0
+[ 2022-05-19 17:53:31,936, ERROR] token: 3NM2BxPFC38G-uol0wj2TZPTi3vIIQl4
+[ 2022-05-19 17:53:31,936, ERROR] {'X-CSRF-token': '3NM2BxPFC38G-uol0wj2TZPTi3vIIQl4', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 17:53:31,937, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:53:33,636, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "POST /http/CEVA/InsertAttachment HTTP/1.1" 400 None
+[ 2022-05-19 17:53:37,962, ERROR] Error post call for sending file 0187092454! status_code: 400 
+[ 2022-05-19 17:53:47,924, ERROR] upload failed for File 0187092454.pdf. status_code: 400!codice errore: ZCEVA_ATTACH/003message: Allegato già acquisitoerrordetails: {'errordetail': {'code': 'ZCEVA_ATTACH/003', 'message': 'Allegato già acquisito'}}
+[ 2022-05-19 17:53:55,546, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: remove
+[ 2022-05-19 17:53:55,546, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/DeleteAttachment
+[ 2022-05-19 17:53:55,546, INFO] {'vbeln': '0187092454', 'nomefile': '0187092454.pdf', 'tipo': 'DDT'} 
+[ 2022-05-19 17:53:55,548, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:53:55,687, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/DeleteAttachment HTTP/1.1" 200 0
+[ 2022-05-19 17:53:55,688, ERROR] token: fQzMk2IC7ntLIQ-lN6lutIZzovIwexlM
+[ 2022-05-19 17:53:55,688, ERROR] {'X-CSRF-token': 'fQzMk2IC7ntLIQ-lN6lutIZzovIwexlM', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 17:53:55,689, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:53:55,830, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "DELETE /http/CEVA/DeleteAttachment HTTP/1.1" 403 431
+[ 2022-05-19 17:54:02,718, ERROR] Error post call for sending file 0187092454! status_code: 403 
+[ 2022-05-19 17:55:50,546, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: upload
+[ 2022-05-19 17:55:50,547, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/InsertAttachment
+[ 2022-05-19 17:55:50,548, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:55:50,707, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/InsertAttachment HTTP/1.1" 200 0
+[ 2022-05-19 17:55:50,708, ERROR] token: F5_3D3GK6q0BiU2GWFPwJzOyKXEWy4CU
+[ 2022-05-19 17:55:50,708, ERROR] {'X-CSRF-token': 'F5_3D3GK6q0BiU2GWFPwJzOyKXEWy4CU', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 17:55:50,710, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:55:52,209, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "POST /http/CEVA/InsertAttachment HTTP/1.1" 400 None
+[ 2022-05-19 17:55:53,596, ERROR] Error post call for sending file 0187092454! status_code: 400 
+[ 2022-05-19 17:56:46,175, ERROR] upload failed for File 0187092454.pdf. status_code: 400!codice errore: ZCEVA_ATTACH/003message: Allegato già acquisitoerrordetails: {'errordetail': {'code': 'ZCEVA_ATTACH/003', 'message': 'Allegato già acquisito'}}
+[ 2022-05-19 17:58:45,721, INFO] logfile deleted C:\Users\f.faccia\Documenti\sviluppo\python\postexe\responses\080000054.response
+[ 2022-05-19 17:58:50,627, INFO] START PROGRAM
+[ 2022-05-19 17:58:50,628, INFO] logs_dir: .\logs 
+[ 2022-05-19 17:58:50,628, INFO] save_dir: .\save 
+[ 2022-05-19 17:58:50,628, INFO] db_dir: .\db 
+[ 2022-05-19 17:58:50,628, INFO] export_dir: .\export 
+[ 2022-05-19 17:58:50,628, INFO] img_dir: .\img 
+[ 2022-05-19 17:58:57,172, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: remove
+[ 2022-05-19 17:58:57,174, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/DeleteAttachment
+[ 2022-05-19 17:58:57,175, INFO] {'vbeln': '0187092454', 'nomefile': '0187092454.pdf', 'tipo': 'DDT'} 
+[ 2022-05-19 17:58:57,179, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:58:57,354, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/DeleteAttachment HTTP/1.1" 200 0
+[ 2022-05-19 17:58:57,356, ERROR] token: cAqveL8tlxpd6l9IOk2_wjHNi2g8qIzO
+[ 2022-05-19 17:58:57,356, ERROR] {'X-CSRF-token': 'cAqveL8tlxpd6l9IOk2_wjHNi2g8qIzO', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 17:59:50,574, INFO] START PROGRAM
+[ 2022-05-19 17:59:50,575, INFO] logs_dir: .\logs 
+[ 2022-05-19 17:59:50,575, INFO] save_dir: .\save 
+[ 2022-05-19 17:59:50,575, INFO] db_dir: .\db 
+[ 2022-05-19 17:59:50,575, INFO] export_dir: .\export 
+[ 2022-05-19 17:59:50,575, INFO] img_dir: .\img 
+[ 2022-05-19 17:59:58,093, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: remove
+[ 2022-05-19 17:59:58,093, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/DeleteAttachment
+[ 2022-05-19 17:59:58,094, INFO] {'vbeln': '0187092454', 'nomefile': '0187092454.pdf', 'tipo': 'DDT'} 
+[ 2022-05-19 17:59:58,098, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 17:59:58,255, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/DeleteAttachment HTTP/1.1" 200 0
+[ 2022-05-19 17:59:58,256, ERROR] token: vs8ogJPMMkSW8Ea2Xj-En3IgoquS3xz2
+[ 2022-05-19 17:59:58,257, ERROR] {'X-CSRF-token': 'vs8ogJPMMkSW8Ea2Xj-En3IgoquS3xz2', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 17:59:58,258, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:00:04,906, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "DELETE /http/CEVA/DeleteAttachment HTTP/1.1" 204 0
+[ 2022-05-19 18:00:08,280, ERROR] remove Successfull for File 0187092454.pdf. status_code: 204!
+[ 2022-05-19 18:00:26,969, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: upload
+[ 2022-05-19 18:00:26,971, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/InsertAttachment
+[ 2022-05-19 18:00:26,972, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:00:27,104, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/InsertAttachment HTTP/1.1" 200 0
+[ 2022-05-19 18:00:27,105, ERROR] token: L8cecBmSImB1Ark1romO6FUR_q1C173Z
+[ 2022-05-19 18:00:27,105, ERROR] {'X-CSRF-token': 'L8cecBmSImB1Ark1romO6FUR_q1C173Z', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 18:00:27,107, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:00:33,174, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "POST /http/CEVA/InsertAttachment HTTP/1.1" 201 None
+[ 2022-05-19 18:00:34,474, ERROR] upload Successfull for File 0187092454.pdf. status_code: 201!
+[ 2022-05-19 18:00:40,032, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: remove
+[ 2022-05-19 18:00:40,033, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/DeleteAttachment
+[ 2022-05-19 18:00:40,033, INFO] {'vbeln': '0187092454', 'nomefile': '0187092454.pdf', 'tipo': 'DDT'} 
+[ 2022-05-19 18:00:40,034, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:00:40,184, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/DeleteAttachment HTTP/1.1" 200 0
+[ 2022-05-19 18:00:40,186, ERROR] token: dFDmtTBzUHHFRDpYxY6jEaLqFEsyr46I
+[ 2022-05-19 18:00:40,186, ERROR] {'X-CSRF-token': 'dFDmtTBzUHHFRDpYxY6jEaLqFEsyr46I', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 18:00:40,187, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:00:47,300, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "DELETE /http/CEVA/DeleteAttachment HTTP/1.1" 204 0
+[ 2022-05-19 18:00:48,530, ERROR] remove Successfull for File 0187092454.pdf. status_code: 204!
+[ 2022-05-19 18:01:50,139, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: upload
+[ 2022-05-19 18:01:50,141, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/InsertAttachment
+[ 2022-05-19 18:01:50,143, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:01:50,324, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/InsertAttachment HTTP/1.1" 200 0
+[ 2022-05-19 18:01:50,326, ERROR] token: JuGal_dTDopv1iczlAmsusw9rsjcteMC
+[ 2022-05-19 18:01:50,326, ERROR] {'X-CSRF-token': 'JuGal_dTDopv1iczlAmsusw9rsjcteMC', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 18:01:50,328, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:01:55,431, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "POST /http/CEVA/InsertAttachment HTTP/1.1" 201 None
+[ 2022-05-19 18:01:56,845, ERROR] upload Successfull for File 0187092454.pdf. status_code: 201!
+[ 2022-05-19 18:02:02,187, INFO] file: C:\Users\f.faccia\Downloads\0187092454.pdf, operazione: remove
+[ 2022-05-19 18:02:02,187, INFO] get token from https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com/http/CEVA/DeleteAttachment
+[ 2022-05-19 18:02:02,187, INFO] {'vbeln': '0187092454', 'nomefile': '0187092454.pdf', 'tipo': 'DDT'} 
+[ 2022-05-19 18:02:02,189, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:02:02,361, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "GET /http/CEVA/DeleteAttachment HTTP/1.1" 200 0
+[ 2022-05-19 18:02:02,363, ERROR] token: buN_iwgzpwtXXomCtLSvlJ7xFszVXXQG
+[ 2022-05-19 18:02:02,363, ERROR] {'X-CSRF-token': 'buN_iwgzpwtXXomCtLSvlJ7xFszVXXQG', 'Authorization': 'Basic c2ItOTY3YzM0YTMtYmJjNi00YTljLWFkYzUtOTQ5ODVhNjg3MjU4IWIxMzgxNDV8aXQtcnQtc2FwLWNsb3VkLWZvdW5kcnktcHJvZC01ZHEzcm45eCFiMTE3OTEyOjg3YTI5Y2Q4LTIxOWEtNDY4Yy1iMWZlLWE5NDA0NDk1MDVmYiRQa0pEbVNHZ1VZeHFSeEFpLTgwTDE3SF82OWtUMmlVdWp1S2k5RGRWMjVBPQ==', 'Accept': 'application/json', 'Content-Type': 'application/json', 'Connection': 'keep-alive'}
+[ 2022-05-19 18:02:02,365, DEBUG] Starting new HTTPS connection (1): sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443
+[ 2022-05-19 18:02:10,798, DEBUG] https://sap-cloud-foundry-prod-5dq3rn9x.it-cpi018-rt.cfapps.eu10-003.hana.ondemand.com:443 "DELETE /http/CEVA/DeleteAttachment HTTP/1.1" 204 0
+[ 2022-05-19 18:02:12,181, ERROR] remove Successfull for File 0187092454.pdf. status_code: 204!
+[ 2022-05-19 18:03:41,249, INFO] logfile deleted C:\Users\f.faccia\Documenti\sviluppo\python\postexe\save\0187098066.pdf
